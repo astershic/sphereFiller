@@ -49,7 +49,18 @@ int main(int argc, const char *argv[]) {
 	}
 
 
-	//load file into meshes (one per particle)
+	//TODO: load file into meshes (one per particle)
+	Node n1 = Node(0.0,0.0,0.0);
+	Node n2 = Node(1.0,2.0,0.0);
+	Node n3 = Node(0.0,2.0,0.0);
+	Node n4 = Node(1.0,0.0,0.0);
+	Node n5 = Node(0.0,0.0,3.0);
+	Node n6 = Node(1.0,2.0,3.0);
+	Node n7 = Node(0.0,2.0,3.0);
+	Node n8 = Node(1.0,0.0,3.0);
+	
+
+	//
 	//	points to nodes
 	//  faces to facets
 	//  node/facet connectivity
