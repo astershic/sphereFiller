@@ -1,11 +1,13 @@
 /*******************************************************************************
 
-  Class <parallelCombiner> 
+  Class <sphereFiller> 
 
   Author: Andrew Stershic
           Duke Computational Mechanics Lab (DCML)
           Duke University - Durham, NC (USA)
   E-mail: ajs84@duke.edu
+
+  Produced at: Oak Ridge National Lab (ORNL) as part of DOE CSGF practicum
 
   Copyright (c) 2013 Andrew Stershic. All rights reserved. No warranty. No
   liability.
