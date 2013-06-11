@@ -18,28 +18,99 @@
 #ifndef __SPHEREFILLER_H__
 #define __SPHEREFILLER_H__
 
-class SphereFiller {
+using namespace::std;
 
+class Node;
+class Facet;
+class Mesh;
+
+class Vec3d {
 public:
-    //! Constructor
-    /*! 
-        \brief Loads values for distribution parameters and the number of elements
-        \param string : distribution name
-        \param parameter1 : first parameter
-        \param parameter2 : second parameter
-        \param nx : number of nodal points
-    */
-    //! CTL Empty constructor
-    SphereFiller ();
+    Vec3d ();
+    Vec3d (double inx, double iny, double inz) {
+		set(inx,iny,inz);
+	};
+	void setX(double inx) {
+		x = inx;
+	}
+	void setY(double iny) {
+		y = iny;
+	}
+	void setZ(double inz) {
+		z = inz;
+	}
+	void set(double inx, double iny, double inz) {
+		x = inx;
+		y = iny;
+		z = inz;
+	}
+	std::string print() {
+		std::string out = "( ";
+		out += x;
+		out += ", ";
+		out += y;
+		out += ", ";
+		out += z;
+		out += ")";
+		return out;
+	}
+    ~Vec3d (); 
 
-    //! Standard destructor
+	double x;
+	double y;
+	double z;
+};
+
+
+class SphereFiller {
+public:
+    SphereFiller ();
     ~SphereFiller (); 
 
-    //! Assign
-    /*! 
-        \brief Switches to the probability distribution methods and writes them to cohPar
-        \param cohPar : cohesive law parameter list, either sigma or delta
-    */
+	std::string _inFile;
+	Mesh * mesh;
+
+private:
+
+};
+
+class Node {
+public:
+    Node ();
+    Node (Vec3d in) {
+		coordinates = in;
+	};
+    ~Node (); 
+	
+
+	vector<Facet*> getFacets() {return facets;};
+	void addFacet (Facet * in) {facets.push_back(in);};
+	Vec3d getCoordinates () {return coordinates;};
+	void setCoordinates (Vec3d in) {coordinates = in;};
+
+private:
+	vector<Facet*> facets;
+	Vec3d coordinates;
+
+};
+
+class Facet {
+public:
+    Facet ();
+    ~Facet (); 
+
+
+private:
+	Vec3d	normal;
+	vector<Node*> nodes;
+};
+
+class Mesh {
+public:
+    Mesh ();
+    ~Mesh (); 
+
+	void GenerateNormal(Node node);
 
 
 private:

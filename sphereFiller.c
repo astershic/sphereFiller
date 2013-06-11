@@ -16,6 +16,7 @@
 #include <fstream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string>
 
 using namespace std;
 
@@ -27,13 +28,32 @@ using namespace std;
 
 /*------------------------------- P U B L I C --------------------------------*/
 
-int main () { return 1;}
+
+int main(int argc, const char *argv[]) {
+	SphereFiller sf;
+	if (argc > 0) {
+		sf._inFile = argv[1];
+		cout << " input file = " << sf._inFile << endl;
+	}
+
+
+	//load file into mesh
+	//	points to nodes
+	//  faces to facets
+	//  node/facet connectivity
+	
+
+	return 1;
+}
 
 SphereFiller::SphereFiller ()  {}
-
 SphereFiller::~SphereFiller ()  {}
+
 
 
 /*------------------------------ P R I V A T E -------------------------------*/
 
+void Mesh::GenerateNormal(Node node) {
+	return;
+}
 
