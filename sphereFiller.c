@@ -32,15 +32,30 @@ using namespace std;
 int main(int argc, const char *argv[]) {
 	SphereFiller sf;
 	if (argc > 0) {
-		sf._inFile = argv[1];
-		cout << " input file = " << sf._inFile << endl;
+		sf.inFile = argv[1];
+		cout << " input file = " << sf.inFile << endl;
+	}
+
+	if (argc > 1) {
+		sf.nSphere = atoi(argv[2]);
+		cout << " number of spheres = " << sf.nSphere << endl;
+	}
+
+	if (argc > 2) {
+		sf.minDist = atof(argv[3]);
+		cout << " minimum distance = " << sf.minDist << endl;
 	}
 
 
-	//load file into mesh
+	//load file into meshes (one per particle)
 	//	points to nodes
 	//  faces to facets
 	//  node/facet connectivity
+
+	//pick random nodes
+	//make spheres
+
+	//write list to file
 	
 
 	return 1;
@@ -54,6 +69,8 @@ SphereFiller::~SphereFiller ()  {}
 /*------------------------------ P R I V A T E -------------------------------*/
 
 void Mesh::GenerateNormal(Node node) {
+	
+
 	return;
 }
 
