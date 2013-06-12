@@ -1,6 +1,6 @@
 #CPP       = mpic++
 CPP       = g++
-CPP_FLAGS = -O3 -Wall -fPIC -m32 -g
+CPP_FLAGS = -O3 -Wall -fPIC -m32 -g -std=c++11
 
 # Classical compilation of the sphereFiller
 sphereFiller.exe: sphereFiller.o 
