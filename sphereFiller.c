@@ -108,8 +108,8 @@ void SphereFiller::parseInputFile ()  {
 	string path = this->inFile;
 	ifstream infile(path.c_str());
 
-	map<int, Node*> noderoster;
-	map<int, Facet*> facetroster;
+	map<int, Node> noderoster;
+	map<int, Facet> facetroster;
 
 	string line;
 	bool node = false;
@@ -130,8 +130,9 @@ void SphereFiller::parseInputFile ()  {
 		if (node && !element) {
 			//make node
 			vector<string> split = strSplit(line);
-			Node node = Node(atof(split[1].c_str()),atof(split[2].c_str()),atof(split[3].c_str()));
-			noderoster.insert(pair<int,Node*> (atoi(split[0].c_str()),&node));
+			int tag = atoi(split[0].c_str());
+			Node node = Node(tag,atof(split[1].c_str()),atof(split[2].c_str()),atof(split[3].c_str()));
+			noderoster.insert(pair<int,Node> (tag,node));
 //			noderoster(atoi(split[0].c_str())) = &node;
 		}
 
@@ -139,17 +140,24 @@ void SphereFiller::parseInputFile ()  {
 			//make element
 			vector<string> split = strSplit(line);
 			int tag = atoi(split[0].c_str()); 
-			int t1 = atoi(split[1].c_str()); Node* n1 = noderoster[t1];
-			int t2 = atoi(split[2].c_str()); Node* n2 = noderoster[t2];
-			int t3 = atoi(split[3].c_str()); Node* n3 = noderoster[t3];
-			Facet facet = Facet(n1, n2, n3);
-			facetroster.insert(pair<int,Facet*> (tag,&facet));
-			n1->addFacet(&facet);
-			n2->addFacet(&facet);
-			n3->addFacet(&facet);
+			int t1 = atoi(split[1].c_str()); Node n1 = noderoster[t1];
+			int t2 = atoi(split[2].c_str()); Node n2 = noderoster[t2];
+			int t3 = atoi(split[3].c_str()); Node n3 = noderoster[t3];
+			Facet facet = Facet(tag, &n1, &n2, &n3);
+			facetroster.insert(pair<int,Facet> (tag,facet));
+			n1.addFacet(&facet);
+			n2.addFacet(&facet);
+			n3.addFacet(&facet);
 		}
 				
 	}
+
+for(map<int, Node >::const_iterator it = noderoster.begin();
+    it != noderoster.end(); ++it)
+{
+	Vec3d coords = it->second.getCoordinates();
+    std::cout << it->first << " " << it->second.print() << endl;
+}
 
 	cout << "node roster size = " << noderoster.size() << endl;
 	cout << "facet roster size = " << facetroster.size() << endl;

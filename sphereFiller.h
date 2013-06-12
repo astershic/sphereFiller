@@ -57,15 +57,10 @@ public:
 		y = iny;
 		z = inz;
 	}
-	std::string print() {
-		std::string out = "( ";
-		out += x;
-		out += ", ";
-		out += y;
-		out += ", ";
-		out += z;
-		out += ")";
-		return out;
+	std::string print() const {
+		std::stringstream sstm;
+		sstm << "( " << x << ", " << y << ", " << z << ")";
+		return sstm.str();
 	}
 
 private:
@@ -100,17 +95,40 @@ public:
     Node (double x, double y, double z) {
 		coordinates = Vec3d(x,y,z);
 	};
+    Node (int inID){
+		id = inID;
+	};
+    Node (int inID, Vec3d in) {
+		coordinates = in;
+		id = inID;
+	};
+    Node (int inID, double x, double y, double z) {
+		coordinates = Vec3d(x,y,z);
+		id = inID;
+	};
+
     ~Node (){}; 
 	
 
 	vector<Facet*> getFacets() {return facets;};
 	void addFacet (Facet * in) {facets.push_back(in);};
-	Vec3d getCoordinates () {return coordinates;};
+	Vec3d getCoordinates () const {return coordinates;};
 	void setCoordinates (Vec3d in) {coordinates = in;};
+
+	int getID() {return id;}
+	void setID (int inID) {
+		id = inID;
+	}
+
+
+	string print() const {
+		return coordinates.print();
+	};
 
 private:
 	vector<Facet*> facets;
 	Vec3d coordinates;
+	int id;
 
 };
 
@@ -119,10 +137,21 @@ public:
     Facet (){};
     ~Facet (){}; 
 
+    Facet (int inID){
+		id = inID;
+	};
+
 	Facet(Node* n1, Node* n2, Node* n3) {
 		nodes.push_back(n1);
 		nodes.push_back(n2);
 		nodes.push_back(n3);
+	};
+
+	Facet(int inID, Node* n1, Node* n2, Node* n3) {
+		nodes.push_back(n1);
+		nodes.push_back(n2);
+		nodes.push_back(n3);
+		id = inID;
 	};
 
 	void addNode (Node* inNode) {
@@ -137,15 +166,21 @@ public:
 		return nodes[num];
 	}
 
+	int getID() {return id;}
+	void setID (int inID) {
+		id = inID;
+	}
+
 private:
 	Vec3d	normal;
 	vector<Node*> nodes;
+	int id;
 };
 
 class Mesh {
 public:
-    Mesh ();
-    ~Mesh (); 
+    Mesh (){};
+    ~Mesh (){}; 
 
 	void GenerateNormal(Node node);
 
@@ -157,8 +192,8 @@ private:
 
 class Sphere {
 public:
-    Sphere ();
-    ~Sphere (); 
+    Sphere (){};
+    ~Sphere (){}; 
 
     Sphere (Vec3d invec, double inrad) {
 		centroid = invec;
