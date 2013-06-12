@@ -20,6 +20,7 @@
 #include <cmath>
 #include <stdio.h>
 #include <stdlib.h>
+#include <cassert>
 
 #ifndef __SPHEREFILLER_H__
 #define __SPHEREFILLER_H__
@@ -115,9 +116,26 @@ private:
 
 class Facet {
 public:
-    Facet ();
-    ~Facet (); 
+    Facet (){};
+    ~Facet (){}; 
 
+	Facet(Node* n1, Node* n2, Node* n3) {
+		nodes.push_back(n1);
+		nodes.push_back(n2);
+		nodes.push_back(n3);
+	};
+
+	void addNode (Node* inNode) {
+		nodes.push_back(inNode);
+	}
+	vector<Node*> getNodes() {
+		return nodes;
+	}
+	Node* getNodes(unsigned num) {
+		assert( (num >= 0) && (num <= 2));
+		assert( num < nodes.size() );
+		return nodes[num];
+	}
 
 private:
 	Vec3d	normal;

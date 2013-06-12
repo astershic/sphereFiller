@@ -109,6 +109,7 @@ void SphereFiller::parseInputFile ()  {
 	ifstream infile(path.c_str());
 
 	map<int, Node*> noderoster;
+	map<int, Facet*> facetroster;
 
 	string line;
 	bool node = false;
@@ -129,16 +130,29 @@ void SphereFiller::parseInputFile ()  {
 		if (node && !element) {
 			//make node
 			vector<string> split = strSplit(line);
-//			cout << line << endl;		
 			Node node = Node(atof(split[1].c_str()),atof(split[2].c_str()),atof(split[3].c_str()));
 			noderoster.insert(pair<int,Node*> (atoi(split[0].c_str()),&node));
+//			noderoster(atoi(split[0].c_str())) = &node;
 		}
 
 		if (element) {
 			//make element
+			vector<string> split = strSplit(line);
+			int tag = atoi(split[0].c_str()); 
+			int t1 = atoi(split[1].c_str()); Node* n1 = noderoster[t1];
+			int t2 = atoi(split[2].c_str()); Node* n2 = noderoster[t2];
+			int t3 = atoi(split[3].c_str()); Node* n3 = noderoster[t3];
+			Facet facet = Facet(n1, n2, n3);
+			facetroster.insert(pair<int,Facet*> (tag,&facet));
+			n1->addFacet(&facet);
+			n2->addFacet(&facet);
+			n3->addFacet(&facet);
 		}
 				
 	}
+
+	cout << "node roster size = " << noderoster.size() << endl;
+	cout << "facet roster size = " << facetroster.size() << endl;
 
 	return;
 }
@@ -152,4 +166,5 @@ void Mesh::GenerateNormal(Node node) {
 
 	return;
 }
+
 
