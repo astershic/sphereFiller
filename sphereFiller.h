@@ -120,9 +120,10 @@ public:
 		id = inID;
 	}
 
-
 	string print() const {
-		return coordinates.print();
+		std::stringstream sstm;
+		sstm << id << ": " << coordinates.print();
+		return sstm.str();
 	};
 
 private:
@@ -160,7 +161,7 @@ public:
 	vector<Node*> getNodes() {
 		return nodes;
 	}
-	Node* getNodes(unsigned num) {
+	Node* getNode(unsigned num) {
 		assert( (num >= 0) && (num <= 2));
 		assert( num < nodes.size() );
 		return nodes[num];
@@ -170,6 +171,25 @@ public:
 	void setID (int inID) {
 		id = inID;
 	}
+
+	string print() const {
+		std::stringstream sstm;
+		assert(nodes[0]);
+		assert(nodes[1]);
+		assert(nodes[2]);
+		sstm << id << ":: " << nodes[0]->print() << " ; " <<  nodes[1]->print() << " ; " << nodes[2]->print();
+		return sstm.str();
+	};
+
+	string printID() const {
+		std::stringstream sstm;
+		assert(nodes[0]);
+		assert(nodes[1]);
+		assert(nodes[2]);
+		sstm << id << ":: " << nodes[0]->getID() << " ; " <<  nodes[1]->getID() << " ; " << nodes[2]->getID();
+		return sstm.str();
+	};
+
 
 private:
 	Vec3d	normal;

@@ -140,23 +140,24 @@ void SphereFiller::parseInputFile ()  {
 			//make element
 			vector<string> split = strSplit(line);
 			int tag = atoi(split[0].c_str()); 
-			int t1 = atoi(split[1].c_str()); Node n1 = noderoster[t1];
-			int t2 = atoi(split[2].c_str()); Node n2 = noderoster[t2];
-			int t3 = atoi(split[3].c_str()); Node n3 = noderoster[t3];
-			Facet facet = Facet(tag, &n1, &n2, &n3);
+			int t1 = atoi(split[1].c_str()); Node* n1 = &noderoster[t1];
+			int t2 = atoi(split[2].c_str()); Node* n2 = &noderoster[t2];
+			int t3 = atoi(split[3].c_str()); Node* n3 = &noderoster[t3];
+			Facet facet = Facet(tag, n1, n2, n3);
 			facetroster.insert(pair<int,Facet> (tag,facet));
-			n1.addFacet(&facet);
-			n2.addFacet(&facet);
-			n3.addFacet(&facet);
+			n1->addFacet(&facet);
+			n2->addFacet(&facet);
+			n3->addFacet(&facet);
+			cout << facet.printID() << endl;
 		}
 				
 	}
 
-for(map<int, Node >::const_iterator it = noderoster.begin();
-    it != noderoster.end(); ++it)
+for(map<int, Facet >::const_iterator it = facetroster.begin();
+    it != facetroster.end(); ++it)
 {
-	Vec3d coords = it->second.getCoordinates();
-    std::cout << it->first << " " << it->second.print() << endl;
+//    std::cout << it->first << " " << it->second.printID() << endl;
+	std::cout << it->second.printID() << endl;
 }
 
 	cout << "node roster size = " << noderoster.size() << endl;
