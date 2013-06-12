@@ -45,10 +45,14 @@ int main(int argc, const char *argv[]) {
 		cout << " minimum distance = " << sf.minDist << endl;
 	}
 
+	//parse input file, save nodes and facets
 	sf.parseInputFile();
+
+	//build nodal connectivity graph
 	sf.buildNodeGraph(); //	sf.printNodeGraph();
 
 	// use graph theory to find individual particles
+	sf.buildMeshes();
 
 	//pick random nodes
 	//make spheres - iteratively blowing them up
@@ -172,6 +176,14 @@ void SphereFiller::printNodeGraph() {
 		}
 	}
 
+}
+
+void SphereFiller::buildMeshes() {
+
+
+	cout << "*MESHES BUILT" << endl;
+
+	return;
 }
 
 

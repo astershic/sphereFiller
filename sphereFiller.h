@@ -81,12 +81,13 @@ public:
 	double minDist;
 	int nSphere;
 	vector<Mesh*> meshes;
+	map<int, Node> noderoster;
+	map<int, Facet> facetroster;
 
 	void parseInputFile();
 	void buildNodeGraph();
 	void printNodeGraph();
-	map<int, Node> noderoster;
-	map<int, Facet> facetroster;
+	void buildMeshes();
 
 private:
 
