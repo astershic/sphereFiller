@@ -15,8 +15,11 @@
 *******************************************************************************/
 #include <vector>
 #include <string>
+#include <sstream>
 #include <algorithm>
 #include <cmath>
+#include <stdio.h>
+#include <stdlib.h>
 
 #ifndef __SPHEREFILLER_H__
 #define __SPHEREFILLER_H__
@@ -29,7 +32,9 @@ class Mesh;
 
 class Vec3d {
 public:
-    Vec3d ();
+    Vec3d (){};
+    ~Vec3d (){};
+
     Vec3d (double inx, double iny, double inz) {
 		set(inx,iny,inz);
 	};
@@ -61,7 +66,7 @@ public:
 		out += ")";
 		return out;
 	}
-    ~Vec3d (); 
+
 private:
 	double x;
 	double y;
@@ -71,12 +76,15 @@ private:
 
 class SphereFiller {
 public:
-    SphereFiller ();
-    ~SphereFiller (); 
+    SphereFiller (){};
+    ~SphereFiller (){}; 
 
 	std::string inFile;
 	double minDist;
 	int nSphere;
+	vector<Mesh*> meshes;
+
+	void parseInputFile();
 
 private:
 
@@ -84,11 +92,14 @@ private:
 
 class Node {
 public:
-    Node ();
+    Node (){};
     Node (Vec3d in) {
 		coordinates = in;
 	};
-    ~Node (); 
+    Node (double x, double y, double z) {
+		coordinates = Vec3d(x,y,z);
+	};
+    ~Node (){}; 
 	
 
 	vector<Facet*> getFacets() {return facets;};
@@ -142,16 +153,26 @@ public:
 	Vec3d getCentroid() {return centroid;};
 
 	std::string print() {
-		string out = centroid.print() + " , ";// + radius;
-		return out;
+		std::stringstream sstm;
+		sstm << centroid.print() << " , " << radius << " , " << mass;
+		return sstm.str();
 	};
+
+	bool containsPoint(Vec3d in) {
+		Vec3d diff = centroid.minus(in);
+		double dist = diff.norm();
+		return (dist < radius);
+	}
+	bool containsPoint(double inx, double iny, double inz) {
+		return containsPoint(Vec3d(inx,iny,inz));
+	}
 
 
 private:
 
 	double radius;
 	Vec3d centroid;
-
+	double mass;
 
 };
 
