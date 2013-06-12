@@ -21,6 +21,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cassert>
+#include <map>
+#include <set>
 
 #ifndef __SPHEREFILLER_H__
 #define __SPHEREFILLER_H__
@@ -81,6 +83,10 @@ public:
 	vector<Mesh*> meshes;
 
 	void parseInputFile();
+	void buildNodeGraph();
+	void printNodeGraph();
+	map<int, Node> noderoster;
+	map<int, Facet> facetroster;
 
 private:
 
@@ -109,6 +115,7 @@ public:
 
     ~Node (){}; 
 	
+	set<Node*> neighbors;
 
 	vector<Facet*> getFacets() {return facets;};
 	void addFacet (Facet * in) {facets.push_back(in);};

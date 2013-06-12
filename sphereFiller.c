@@ -16,10 +16,6 @@
 #include "sphereFiller.h"
 #include <iostream>
 #include <fstream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
-#include <map>
 
 using namespace std;
 
@@ -50,22 +46,8 @@ int main(int argc, const char *argv[]) {
 	}
 
 	sf.parseInputFile();
+	sf.buildNodeGraph(); //	sf.printNodeGraph();
 
-	//TODO: load file
-/*	Node n1 = Node(0.0,0.0,0.0);
-	Node n2 = Node(1.0,2.0,0.0);
-	Node n3 = Node(0.0,2.0,0.0);
-	Node n4 = Node(1.0,0.0,0.0);
-	Node n5 = Node(0.0,0.0,3.0);
-	Node n6 = Node(1.0,2.0,3.0);
-	Node n7 = Node(0.0,2.0,3.0);
-	Node n8 = Node(1.0,0.0,3.0);
-*/
-
-	//
-	//	points to nodes
-	//  faces to facets
-	// find node/facet connectivity
 	// use graph theory to find individual particles
 
 	//pick random nodes
@@ -108,8 +90,8 @@ void SphereFiller::parseInputFile ()  {
 	string path = this->inFile;
 	ifstream infile(path.c_str());
 
-	map<int, Node> noderoster;
-	map<int, Facet> facetroster;
+	noderoster.clear();
+	facetroster.clear();
 
 	string line;
 	bool node = false;
@@ -131,9 +113,11 @@ void SphereFiller::parseInputFile ()  {
 			//make node
 			vector<string> split = strSplit(line);
 			int tag = atoi(split[0].c_str());
-			Node node = Node(tag,atof(split[1].c_str()),atof(split[2].c_str()),atof(split[3].c_str()));
+			double x = atof(split[1].c_str());			
+			double y = atof(split[2].c_str());
+			double z = atof(split[3].c_str());
+			Node node = Node(tag,x,y,z);
 			noderoster.insert(pair<int,Node> (tag,node));
-//			noderoster(atoi(split[0].c_str())) = &node;
 		}
 
 		if (element) {
@@ -148,22 +132,46 @@ void SphereFiller::parseInputFile ()  {
 			n1->addFacet(&facet);
 			n2->addFacet(&facet);
 			n3->addFacet(&facet);
-			cout << facet.printID() << endl;
 		}
 				
 	}
 
-for(map<int, Facet >::const_iterator it = facetroster.begin();
-    it != facetroster.end(); ++it)
-{
-//    std::cout << it->first << " " << it->second.printID() << endl;
-	std::cout << it->second.printID() << endl;
-}
-
-	cout << "node roster size = " << noderoster.size() << endl;
-	cout << "facet roster size = " << facetroster.size() << endl;
+	cout << "*INPUT FILE PARSED" << endl;
+	cout << "	node roster size = " << noderoster.size() << endl;
+	cout << "	facet roster size = " << facetroster.size() << endl;
 
 	return;
+}
+
+void SphereFiller::buildNodeGraph() {
+
+	for(map<int,Facet>::iterator it = facetroster.begin(); it != facetroster.end(); it++) {
+		Facet* facet = &it->second;
+		Node* n1 = facet->getNode(0);
+		Node* n2 = facet->getNode(1);
+		Node* n3 = facet->getNode(2);
+		n1->neighbors.insert(n2); n1->neighbors.insert(n3);
+		n2->neighbors.insert(n1); n2->neighbors.insert(n3);
+		n3->neighbors.insert(n1); n3->neighbors.insert(n2);
+	}
+
+	cout << "*NODE GRAPH BUILT" << endl;
+	
+	return;
+}
+
+void SphereFiller::printNodeGraph() {
+
+	for(map<int,Node>::iterator it = noderoster.begin(); it != noderoster.end(); it++) {
+
+		Node* node = &it->second;
+		cout << endl;
+		cout << "<" << node->getID() << ">" << endl;
+		for (Node* n : node->neighbors){
+			cout << n->getID() << endl;
+		}
+	}
+
 }
 
 
