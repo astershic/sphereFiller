@@ -45,8 +45,18 @@ int main(int argc, const char *argv[]) {
 		cout << " minimum distance = " << sf.minDist << endl;
 	}
 
+	//load all then process all, or do one at a time?
+	bool load_all = true;
+
 	//parse input file, save nodes and facets
-	sf.parseInputFile();
+	sf.parseInputFile(load_all);
+
+	//build Spheres
+	if (load_all) {
+		for (unsigned i = 0; i < sf.meshroster.size(); ++i) {
+			sf.meshroster[i].buildSpheres();
+		}
+	}
 
 	/*
 	//build nodal connectivity graph
@@ -92,7 +102,11 @@ vector<string> strSplit (string in)  {
 	return out;
 }
 
-void SphereFiller::parseInputFile ()  {
+void Mesh::buildSpheres() {
+
+}
+
+void SphereFiller::parseInputFile (bool load_all)  {
 	string path = this->inFile;
 	ifstream infile(path.c_str());
 	while (!infile.eof()) {
@@ -146,9 +160,15 @@ void SphereFiller::parseInputFile ()  {
 			}
 		}
 	
-		//if mesh is not empty, save it
+		//if mesh is not empty, save or process it
 		if (mesh.noderoster.size() > 0 && mesh.facetroster.size() > 0) {
-			meshroster.push_back(mesh);
+			if (load_all) {
+				//save
+				meshroster.push_back(mesh);
+			} else {
+				//process
+				mesh.buildSpheres();
+			}
 		}
 				
 	}

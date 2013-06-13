@@ -82,7 +82,7 @@ public:
 	int nSphere;
 	vector<Mesh> meshroster;
 
-	void parseInputFile();
+	void parseInputFile(bool load_all);
 
 private:
 
@@ -213,6 +213,7 @@ public:
 	void buildNodeGraph();
 	void printNodeGraph();
 //	void buildMeshes();
+	void buildSpheres();
 	void GenerateNormal(Node node);
 	void removeConnected(set<Node*>& nodework, Node* node);
 
