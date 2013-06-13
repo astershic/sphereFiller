@@ -53,17 +53,23 @@ public:
 	Vec3d plus(Vec3d in) {return Vec3d(x+in.x,y+in.y,z+in.z);};
 	Vec3d minus(Vec3d in) {return Vec3d(x-in.x,y-in.y,z-in.z);};
 	double dot(Vec3d in) {return (x*in.x + y*in.y + z*in.z);};
+	Vec3d cross(Vec3d in) {
+		return Vec3d(y*in.z - z*in.y, z*in.x - x*in.z, x*in.y-y*in.x);
+	};
+	Vec3d mult(double mul) {
+		return Vec3d(x*mul,y*mul,z*mul);
+	};
 
 	void set(double inx, double iny, double inz) {
 		x = inx;
 		y = iny;
 		z = inz;
-	}
+	};
 	std::string print() const {
 		std::stringstream sstm;
 		sstm << "( " << x << ", " << y << ", " << z << ")";
 		return sstm.str();
-	}
+	};
 
 private:
 	double x;
@@ -121,7 +127,14 @@ public:
 	int getID() {return id;}
 	void setID (int inID) {
 		id = inID;
-	}
+	};
+
+	double dist(Node* other) {
+		Vec3d c1 = getCoordinates();
+		Vec3d c2 = other->getCoordinates();
+		Vec3d diff = c1.minus(c2);
+		return diff.norm();
+	};
 
 	string print() const {
 		std::stringstream sstm;
@@ -158,22 +171,32 @@ public:
 		id = inID;
 	};
 
+	Vec3d normal() {
+		assert(nodes.size() == 3);
+		Vec3d c1 = nodes[0]->getCoordinates();
+		Vec3d c2 = nodes[1]->getCoordinates();
+		Vec3d c3 = nodes[2]->getCoordinates();
+		Vec3d v1 = c1.minus(c2);
+		Vec3d v2 = c1.minus(c3);
+		return v1.cross(v2);
+	};
+
 	void addNode (Node* inNode) {
 		nodes.push_back(inNode);
-	}
+	};
 	vector<Node*> getNodes() {
 		return nodes;
-	}
+	};
 	Node* getNode(unsigned num) {
 		assert( (num >= 0) && (num <= 2));
 		assert( num < nodes.size() );
 		return nodes[num];
-	}
+	};
 
 	int getID() {return id;}
 	void setID (int inID) {
 		id = inID;
-	}
+	};
 
 	string print() const {
 		std::stringstream sstm;
@@ -195,7 +218,6 @@ public:
 
 
 private:
-	Vec3d	normal;
 	vector<Node*> nodes;
 	int id;
 };
@@ -207,16 +229,16 @@ public:
     ~Mesh (){}; 
 
 	int tag;
-	map<int, Node> noderoster;
-	map<int, Facet> facetroster;
+	map<int, Node*> noderoster;
+	map<int, Facet*> facetroster;
 
 	void buildNodeGraph();
 	void printNodeGraph();
 //	void buildMeshes();
 	void buildSpheres();
-	void GenerateNormal(Node node);
+	Vec3d generateNormal(Node* node);
 	void removeConnected(set<Node*>& nodework, Node* node);
-
+/*
 	void addNode (Node* inNode) {
 		nodes.push_back(inNode);
 	}
@@ -226,13 +248,13 @@ public:
 	int nodeCount() {
 		return nodes.size();
 	}
-
+*/
 //	vector<Facet*> getFacets() {return facets;};
 //	void addFacet (Facet * in) {facets.push_back(in);};
 
 private:
-	vector<Node*> nodes;
-//	vector<Facet*> facets;
+//	vector<Node*> nodes;
+////	vector<Facet*> facets;
 
 };
 
@@ -244,6 +266,11 @@ public:
 
     Sphere (Vec3d invec, double inrad) {
 		centroid = invec;
+		radius = inrad;
+	};
+
+    Sphere (Node* n1, double inrad) {
+		centroid = n1->getCoordinates();
 		radius = inrad;
 	};
 
@@ -262,10 +289,10 @@ public:
 		Vec3d diff = centroid.minus(in);
 		double dist = diff.norm();
 		return (dist < radius);
-	}
+	};
 	bool containsPoint(double inx, double iny, double inz) {
 		return containsPoint(Vec3d(inx,iny,inz));
-	}
+	};
 
 
 private:

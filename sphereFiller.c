@@ -65,13 +65,6 @@ int main(int argc, const char *argv[]) {
 	// use graph theory to find individual particles
 	sf.buildMeshes();
 	*/
-
-	//pick random nodes
-	//make spheres - iteratively blowing them up
-
-	//write list to file
-	
-
 	return 1;
 }
 
@@ -102,8 +95,65 @@ vector<string> strSplit (string in)  {
 	return out;
 }
 
+
+template <class T> void deleteObjects (map<int,T*> a) {
+	for(typename map<int,T*>::iterator it = a.begin(); it != a.end(); it++) {
+		T* ptr = it->second;
+		delete &ptr;
+	}
+	return;
+}
+
 void Mesh::buildSpheres() {
 
+//	-for loop, to count, consider mindist
+
+	//pick random nodes
+	map<int,Node*>::iterator item = noderoster.begin();
+	std::advance( item, rand() % noderoster.size() );
+	Node* n1 = item->second;
+	map<int,Node*>::iterator item2 = noderoster.begin();
+	std::advance( item2, rand() % noderoster.size() );
+	Node* n2 = item2->second;
+
+	//make first radius, using distance between two random nodes as a basis
+	double radius = n1->dist(n2);
+cout << radius << endl;
+
+	//find normal direction
+	Vec3d normal = generateNormal(n1);
+
+	//make spheres - iteratively blowing them up
+	Sphere sph = Sphere(n1, radius);
+	//write sphere to file
+
+	//end-forloop
+
+}
+
+Vec3d Mesh::generateNormal(Node* n1) {
+	assert(n1);
+	vector<Facet*> facets = n1->getFacets();
+	assert(facets.size() > 0);
+	cout << "here" << endl;
+	assert(facets[0]);
+	cout << facets[0]->getID() << endl;
+	cout << facets[0]->getNodes().size() << endl;
+	cout << facets[0]->print() << endl;
+	Vec3d normal = facets[0]->normal();
+	
+	for (unsigned i = 1; i < facets.size(); ++i) {
+		Vec3d norm = facets[i]->normal();
+		//reverse orientation if necessary
+		Vec3d scaled = normal.mult(static_cast<double> (i));
+		double dot = scaled.dot(norm);
+		if (dot < 0) norm = norm.mult(-1.0);
+		normal = normal.plus(norm); 
+	}
+
+	normal = normal.mult(static_cast<double> (facets.size()));
+
+	return normal;
 }
 
 void SphereFiller::parseInputFile (bool load_all)  {
@@ -112,8 +162,11 @@ void SphereFiller::parseInputFile (bool load_all)  {
 	while (!infile.eof()) {
 		Mesh mesh = Mesh();
 
+		deleteObjects(mesh.noderoster);
+		deleteObjects(mesh.facetroster);
 		mesh.noderoster.clear();
 		mesh.facetroster.clear();
+
 		string line;
 		bool node = false;
 		bool element = false;
@@ -138,8 +191,9 @@ void SphereFiller::parseInputFile (bool load_all)  {
 				double x = atof(split[1].c_str());			
 				double y = atof(split[2].c_str());
 				double z = atof(split[3].c_str());
-				Node node = Node(tag,x,y,z);
-				mesh.noderoster.insert(pair<int,Node> (tag,node));
+				Node* node = new Node(tag,x,y,z);
+				mesh.noderoster.insert(pair<int,Node*> (tag,node));
+//				mesh.addNode(&node);
 			}
 
 			if (element) {
@@ -149,14 +203,15 @@ void SphereFiller::parseInputFile (bool load_all)  {
 				//check for triangle element - 3 nodes
 				if (split.size() != 4) break;
 				int tag = atoi(split[0].c_str()); 
-				int t1 = atoi(split[1].c_str()); Node* n1 = &mesh.noderoster[t1];
-				int t2 = atoi(split[2].c_str()); Node* n2 = &mesh.noderoster[t2];
-				int t3 = atoi(split[3].c_str()); Node* n3 = &mesh.noderoster[t3];
-				Facet facet = Facet(tag, n1, n2, n3);
-				mesh.facetroster.insert(pair<int,Facet> (tag,facet));
-				n1->addFacet(&facet);
-				n2->addFacet(&facet);
-				n3->addFacet(&facet);
+				int t1 = atoi(split[1].c_str()); Node* n1 = mesh.noderoster[t1];
+				int t2 = atoi(split[2].c_str()); Node* n2 = mesh.noderoster[t2];
+				int t3 = atoi(split[3].c_str()); Node* n3 = mesh.noderoster[t3];
+				Facet* facet = new Facet(tag, n1, n2, n3);
+				mesh.facetroster.insert(pair<int,Facet*> (tag,facet));
+				n1->addFacet(facet);
+				n2->addFacet(facet);
+				n3->addFacet(facet);
+				assert(facet->getNodes().size() == 3);
 			}
 		}
 	
@@ -185,8 +240,8 @@ void SphereFiller::parseInputFile (bool load_all)  {
 
 void Mesh::buildNodeGraph() {
 
-	for(map<int,Facet>::iterator it = facetroster.begin(); it != facetroster.end(); it++) {
-		Facet* facet = &it->second;
+	for(map<int,Facet*>::iterator it = facetroster.begin(); it != facetroster.end(); it++) {
+		Facet* facet = it->second;
 		Node* n1 = facet->getNode(0);
 		Node* n2 = facet->getNode(1);
 		Node* n3 = facet->getNode(2);
@@ -202,9 +257,9 @@ void Mesh::buildNodeGraph() {
 
 void Mesh::printNodeGraph() {
 
-	for(map<int,Node>::iterator it = noderoster.begin(); it != noderoster.end(); it++) {
+	for(map<int,Node*>::iterator it = noderoster.begin(); it != noderoster.end(); it++) {
 
-		Node* node = &it->second;
+		Node* node = it->second;
 		cout << endl;
 		cout << "<" << node->getID() << ">" << endl;
 		for (Node* n : node->neighbors){
@@ -234,7 +289,7 @@ void SphereFiller::buildMeshes() {
 	cout << "*MESHES BUILT" << endl;
 	cout << "    mesh roster size = " << meshroster.size() << endl;
 	for (unsigned i = 0; i < meshroster.size() ; ++i) {
-		cout << "    " << i << "    " << meshroster[i].nodeCount() << endl;
+		cout << "    " << i << "    " << meshroster[i]->nodeCount() << endl;
 	}
 
 	return;
@@ -277,11 +332,4 @@ cout << node->getID() << endl;
 */
 
 /*------------------------------ P R I V A T E -------------------------------*/
-
-void Mesh::GenerateNormal(Node node) {
-	
-
-	return;
-}
-
 
