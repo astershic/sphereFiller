@@ -48,11 +48,13 @@ int main(int argc, const char *argv[]) {
 	//parse input file, save nodes and facets
 	sf.parseInputFile();
 
+	/*
 	//build nodal connectivity graph
 	sf.buildNodeGraph(); //	sf.printNodeGraph();
 
 	// use graph theory to find individual particles
 	sf.buildMeshes();
+	*/
 
 	//pick random nodes
 	//make spheres - iteratively blowing them up
@@ -93,61 +95,75 @@ vector<string> strSplit (string in)  {
 void SphereFiller::parseInputFile ()  {
 	string path = this->inFile;
 	ifstream infile(path.c_str());
+	while (!infile.eof()) {
+		Mesh mesh = Mesh();
 
-	noderoster.clear();
-	facetroster.clear();
+		mesh.noderoster.clear();
+		mesh.facetroster.clear();
+		string line;
+		bool node = false;
+		bool element = false;
 
-	string line;
-	bool node = false;
-	bool element = false;
-	while (getline(infile,line)) {
-		if (line.substr(0,5) == "*Node") {
-			node = true;
-			continue;
-		}
-		if (line.substr(0,8) == "*Element") {
-			element = true;
-			continue;
-		}
-		if (line.substr(0,6) == "*Elset") {
-			break;
-		}
+		while (getline(infile,line)) {
+			if (line.substr(0,5) == "*Node") {
+				node = true;
+				continue;
+			}
+			if (line.substr(0,8) == "*Element") {
+				element = true;
+				continue;
+			}
+			if (line.substr(0,6) == "*Elset" || line.substr(0,5) == "*Nset") {
+				break;
+			}
 		
-		if (node && !element) {
-			//make node
-			vector<string> split = strSplit(line);
-			int tag = atoi(split[0].c_str());
-			double x = atof(split[1].c_str());			
-			double y = atof(split[2].c_str());
-			double z = atof(split[3].c_str());
-			Node node = Node(tag,x,y,z);
-			noderoster.insert(pair<int,Node> (tag,node));
-		}
+			if (node && !element) {
+				//make node
+				vector<string> split = strSplit(line);
+				int tag = atoi(split[0].c_str());
+				double x = atof(split[1].c_str());			
+				double y = atof(split[2].c_str());
+				double z = atof(split[3].c_str());
+				Node node = Node(tag,x,y,z);
+				mesh.noderoster.insert(pair<int,Node> (tag,node));
+			}
 
-		if (element) {
-			//make element
-			vector<string> split = strSplit(line);
-			int tag = atoi(split[0].c_str()); 
-			int t1 = atoi(split[1].c_str()); Node* n1 = &noderoster[t1];
-			int t2 = atoi(split[2].c_str()); Node* n2 = &noderoster[t2];
-			int t3 = atoi(split[3].c_str()); Node* n3 = &noderoster[t3];
-			Facet facet = Facet(tag, n1, n2, n3);
-			facetroster.insert(pair<int,Facet> (tag,facet));
-			n1->addFacet(&facet);
-			n2->addFacet(&facet);
-			n3->addFacet(&facet);
+			if (element) {
+				//make element
+				vector<string> split = strSplit(line);
+				
+				//check for triangle element - 3 nodes
+				if (split.size() != 4) break;
+				int tag = atoi(split[0].c_str()); 
+				int t1 = atoi(split[1].c_str()); Node* n1 = &mesh.noderoster[t1];
+				int t2 = atoi(split[2].c_str()); Node* n2 = &mesh.noderoster[t2];
+				int t3 = atoi(split[3].c_str()); Node* n3 = &mesh.noderoster[t3];
+				Facet facet = Facet(tag, n1, n2, n3);
+				mesh.facetroster.insert(pair<int,Facet> (tag,facet));
+				n1->addFacet(&facet);
+				n2->addFacet(&facet);
+				n3->addFacet(&facet);
+			}
+		}
+	
+		//if mesh is not empty, save it
+		if (mesh.noderoster.size() > 0 && mesh.facetroster.size() > 0) {
+			meshroster.push_back(mesh);
 		}
 				
 	}
 
 	cout << "*INPUT FILE PARSED" << endl;
-	cout << "	node roster size = " << noderoster.size() << endl;
-	cout << "	facet roster size = " << facetroster.size() << endl;
+	cout << "    mesh roster size = " << meshroster.size() << endl;	
+	for (unsigned i = 0; i < meshroster.size(); ++i) {
+		cout << "    node roster size = " << meshroster[i].noderoster.size() << endl;
+		cout << "    facet roster size = " << meshroster[i].facetroster.size() << endl;
+	}
 
 	return;
 }
 
-void SphereFiller::buildNodeGraph() {
+void Mesh::buildNodeGraph() {
 
 	for(map<int,Facet>::iterator it = facetroster.begin(); it != facetroster.end(); it++) {
 		Facet* facet = &it->second;
@@ -164,7 +180,7 @@ void SphereFiller::buildNodeGraph() {
 	return;
 }
 
-void SphereFiller::printNodeGraph() {
+void Mesh::printNodeGraph() {
 
 	for(map<int,Node>::iterator it = noderoster.begin(); it != noderoster.end(); it++) {
 
@@ -177,16 +193,68 @@ void SphereFiller::printNodeGraph() {
 	}
 
 }
-
+/*
 void SphereFiller::buildMeshes() {
+	
+	//copy map
+	set<Node*> nodelist;	
+    for( map<int, Node>::iterator it = noderoster.begin(); it != noderoster.end(); ++it ) {
+    	nodelist.insert( &it->second );
+    }
 
+	for(Node* node : nodelist) {
+		Mesh mesh = Mesh();
+		mesh.removeConnected(nodelist, node);
+
+		meshroster.push_back(mesh);
+
+		if (nodelist.size() == 0) break;
+	}
 
 	cout << "*MESHES BUILT" << endl;
+	cout << "    mesh roster size = " << meshroster.size() << endl;
+	for (unsigned i = 0; i < meshroster.size() ; ++i) {
+		cout << "    " << i << "    " << meshroster[i].nodeCount() << endl;
+	}
 
 	return;
 }
 
 
+void Mesh::removeConnected(set<Node*>& nodelist, Node* node) {
+	//see if this node is already in this mesh. if so, stop.
+	bool is_in = false;
+	for (Node* n : nodes) {
+		if (n->getID() == node->getID()) is_in = true;
+	}	
+	if (is_in)  	return;
+
+//cout << "pass 1" << endl;
+//cout << nodelist.size() << endl;
+
+	//if already removed from main list, stop
+	bool is_off = true;
+	for (Node* n : nodelist) {
+		if (n->getID() == node->getID()) is_off = false;
+	}
+	if (is_off)  	return;
+
+//cout << "pass 2" << endl;
+
+	//if not, add it, remove from overall list and perform recursive call on neighbors
+	addNode(node);
+	set<Node*> neighbors = node->neighbors;
+	nodelist.erase(node);	
+
+cout << node->getID() << endl;
+
+	for(Node* n : neighbors) {
+		removeConnected(nodelist, n);
+	}
+	
+	return;	
+}
+*/
 
 /*------------------------------ P R I V A T E -------------------------------*/
 

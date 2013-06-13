@@ -80,14 +80,9 @@ public:
 	std::string inFile;
 	double minDist;
 	int nSphere;
-	vector<Mesh*> meshes;
-	map<int, Node> noderoster;
-	map<int, Facet> facetroster;
+	vector<Mesh> meshroster;
 
 	void parseInputFile();
-	void buildNodeGraph();
-	void printNodeGraph();
-	void buildMeshes();
 
 private:
 
@@ -208,12 +203,35 @@ private:
 class Mesh {
 public:
     Mesh (){};
+    Mesh (int in){tag = in;};
     ~Mesh (){}; 
 
-	void GenerateNormal(Node node);
+	int tag;
+	map<int, Node> noderoster;
+	map<int, Facet> facetroster;
 
+	void buildNodeGraph();
+	void printNodeGraph();
+//	void buildMeshes();
+	void GenerateNormal(Node node);
+	void removeConnected(set<Node*>& nodework, Node* node);
+
+	void addNode (Node* inNode) {
+		nodes.push_back(inNode);
+	}
+	vector<Node*> getNodes() {
+		return nodes;
+	}
+	int nodeCount() {
+		return nodes.size();
+	}
+
+//	vector<Facet*> getFacets() {return facets;};
+//	void addFacet (Facet * in) {facets.push_back(in);};
 
 private:
+	vector<Node*> nodes;
+//	vector<Facet*> facets;
 
 };
 
