@@ -1,0 +1,2 @@
+rm *.out
+./sphereFiller.exe test.inp 4 1.0
