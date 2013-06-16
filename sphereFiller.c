@@ -30,17 +30,19 @@ using namespace std;
 
 int main(int argc, const char *argv[]) {
 	SphereFiller sf;
-	if (argc > 0) {
+	if (argc > 1) {
 		sf.inFile = argv[1];
 		cout << " input file = " << sf.inFile << endl;
 	}
 
-	if (argc > 1) {
+	sf.nSphere = 1;
+	if (argc > 2) {
 		sf.nSphere = atoi(argv[2]);
 		cout << " number of spheres = " << sf.nSphere << endl;
 	}
 
-	if (argc > 2) {
+	sf.minDist = 0.0;
+	if (argc > 3) {
 		sf.minDist = atof(argv[3]);
 		cout << " minimum distance = " << sf.minDist << endl;
 	}
@@ -54,7 +56,7 @@ int main(int argc, const char *argv[]) {
 	//build Spheres
 	if (load_all) {
 		for (unsigned i = 0; i < sf.meshroster.size(); ++i) {
-			sf.meshroster[i].buildSpheres(sf.nSphere, sf.inFile);
+			sf.meshroster[i].buildSpheres(sf.nSphere, sf.minDist, sf.inFile);
 		}
 	}
 
@@ -104,7 +106,7 @@ template <class T> void deleteObjects (map<int,T*> a) {
 	return;
 }
 
-void Mesh::buildSpheres(int nSphere, string inFile) {
+void Mesh::buildSpheres(int nSphere, double minDist, string inFile) {
 
 	vector<int> idList;
 	vector<Node*> bases;
@@ -115,19 +117,27 @@ void Mesh::buildSpheres(int nSphere, string inFile) {
 
 		//pick random nodes
 		map<int,Node*>::iterator item = noderoster.begin();
-		std::advance( item, rand() % noderoster.size() );
-		Node* n1 = item->second;
-		int id = item->first;
+		Node* n1; int id;
 
-		//correct if node already used
-		while (std::find(idList.begin(), idList.end(), id)!=idList.end()) {
-			cout << "finding new node" << endl;
+		//check valid base node generation
+		bool okay1 = false;
+		bool okay2 = false;
+		while (!okay1 || !okay2) {
+
 			std::advance( item, rand() % noderoster.size() );
 			n1 = item->second;
 			id = item->first;
-		}
 
-		//TODO check distance
+//			cout << "checking node " << okay1 << " " << okay2 << endl;
+			//correct if node already used
+			okay1 = std::find(idList.begin(), idList.end(), id)==idList.end();
+
+			//check distance
+			okay2 = true;
+			for (unsigned j = 0; j < bases.size(); ++j) {
+				if (n1->dist(bases[j]) < minDist) {okay2 = false; break;}
+			}		
+		}
 
 		//max and min distance
 		double max = 0.0;
@@ -148,8 +158,8 @@ void Mesh::buildSpheres(int nSphere, string inFile) {
 		//get right size of sphere
 		bisectRadius(&sph1,min*0.1*0.5,max*10.0*0.5,0);
 
-		cout << "radius = " << sph1.getRadius() << endl;
-		cout << "center = " << sph1.getCentroid().print() << endl;
+//		cout << "radius = " << sph1.getRadius() << endl;
+//		cout << "center = " << sph1.getCentroid().print() << endl;
 
 		//save Sphere to lists
 		sphereList.push_back(sph1);
@@ -291,7 +301,7 @@ void SphereFiller::parseInputFile (bool load_all)  {
 				meshroster.push_back(mesh);
 			} else {
 				//process
-				mesh.buildSpheres(nSphere, inFile);
+				mesh.buildSpheres(nSphere, minDist, inFile);
 			}
 		}
 				
