@@ -176,6 +176,8 @@ void Mesh::buildSpheres(int nSphere, double minDist, string inFile) {
 	}
 	myfile.close();
 
+	cout << "*SPHERES BUILT" << endl;
+
 }
 
 void Mesh::bisectRadius(Sphere* sph, double rSmall, double rBig, int count) {
