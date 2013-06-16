@@ -54,7 +54,7 @@ int main(int argc, const char *argv[]) {
 	//build Spheres
 	if (load_all) {
 		for (unsigned i = 0; i < sf.meshroster.size(); ++i) {
-			sf.meshroster[i].buildSpheres();
+			sf.meshroster[i].buildSpheres(sf.nSphere);
 		}
 	}
 
@@ -68,7 +68,7 @@ int main(int argc, const char *argv[]) {
 	return 1;
 }
 
-void printVector(vector<string> in) {
+template<class T> void printVector(vector<T> in) {
 	for (unsigned i = 0; i < in.size(); ++i) {
 		cout << in[i] + "|";
 	}
@@ -104,54 +104,120 @@ template <class T> void deleteObjects (map<int,T*> a) {
 	return;
 }
 
-void Mesh::buildSpheres() {
+void Mesh::buildSpheres(int nSphere) {
 
-//	-for loop, to count, consider mindist
+	vector<int> idList;
+	vector<Node*> bases;
+	vector<Sphere> sphereList;
+	
 
-	//pick random nodes
-	map<int,Node*>::iterator item = noderoster.begin();
-	std::advance( item, rand() % noderoster.size() );
-	Node* n1 = item->second;
-	map<int,Node*>::iterator item2 = noderoster.begin();
-	std::advance( item2, rand() % noderoster.size() );
-	Node* n2 = item2->second;
+	for (int i = 0; i < nSphere; ++i) {
 
-	//make first radius, using distance between two random nodes as a basis
-	double radius = n1->dist(n2);
-cout << radius << endl;
+		//pick random nodes
+		map<int,Node*>::iterator item = noderoster.begin();
+		std::advance( item, rand() % noderoster.size() );
+		Node* n1 = item->second;
+		int id = item->first;
 
-	//find normal direction
-	Vec3d normal = generateNormal(n1);
+		//correct if node already used
+		while (std::find(idList.begin(), idList.end(), id)!=idList.end()) {
+			cout << "finding new node" << endl;
+			std::advance( item, rand() % noderoster.size() );
+			n1 = item->second;
+			id = item->first;
+		}
 
-	//make spheres - iteratively blowing them up
-	Sphere sph = Sphere(n1, radius);
-	//write sphere to file
+		//TODO check distance
 
-	//end-forloop
+		//max and min distance
+		double max = 0.0;
+		double min = std::numeric_limits<double>::max();
+		for(map<int,Node*>::iterator it = noderoster.begin(); it != noderoster.end(); it++) {
+			if (it->first == id) continue;
+			Node* n = it->second;
+			double dist = n1->dist(n);
+			if (dist < min) {min = dist;}
+			if (dist > max) {max = dist;}
+		}
+
+		//find normal direction
+		Vec3d normal = generateNormal(n1);
+		//make spheres - iteratively blowing them up
+		Sphere sph1 = Sphere(n1, min, normal, 1);
+
+		//get right size of sphere
+		bisectRadius(&sph1,min*0.1*0.5,max*10.0*0.5,0);
+
+		cout << "radius = " << sph1.getRadius() << endl;
+		cout << "center = " << sph1.getCentroid().print() << endl;
+
+		//save Sphere to lists
+		sphereList.push_back(sph1);
+		bases.push_back(sph1.getBase());
+		idList.push_back(sph1.getBase()->getID());
+	}
+
+	for (unsigned i = 0; i < sphereList.size(); ++i) {
+
+	//write spheres to file - TODO
+
+	}
 
 }
 
+void Mesh::bisectRadius(Sphere* sph, double rSmall, double rBig, int count) {
+	if (count > 10) {
+		return;	
+	}
+
+	double test = sqrt(rSmall*rBig);
+	sph->setRadius(test);
+
+	if (!clearSphere(sph)) {
+		//if bisection is too big, make smaller
+		bisectRadius(sph,rSmall,test,count+1);
+	} else {
+		//if bisection is works/too small, make bigger
+		bisectRadius(sph,test,rBig,count+1);
+	}
+	return;
+}
+
+bool Mesh::clearSphere(Sphere* sph) {
+	int count = 0;
+	for(map<int,Node*>::iterator it = noderoster.begin(); it != noderoster.end(); it++) {
+		Node* node = it->second;
+		
+		//don't count it if it's the base point
+		if (node->getID() == sph->getBase()->getID()) continue;
+
+		//count if a node is contained
+		if (sph->containsPoint(node)) count++;
+	}
+	if (count > 0) return false;
+	return true;
+}
+
 Vec3d Mesh::generateNormal(Node* n1) {
-	assert(n1);
 	vector<Facet*> facets = n1->getFacets();
 	assert(facets.size() > 0);
-	cout << "here" << endl;
-	assert(facets[0]);
-	cout << facets[0]->getID() << endl;
-	cout << facets[0]->getNodes().size() << endl;
-	cout << facets[0]->print() << endl;
 	Vec3d normal = facets[0]->normal();
 	
 	for (unsigned i = 1; i < facets.size(); ++i) {
 		Vec3d norm = facets[i]->normal();
 		//reverse orientation if necessary
-		Vec3d scaled = normal.mult(static_cast<double> (i));
+		Vec3d scaled = normal.mult(1.0/static_cast<double> (i));
 		double dot = scaled.dot(norm);
 		if (dot < 0) norm = norm.mult(-1.0);
 		normal = normal.plus(norm); 
 	}
 
-	normal = normal.mult(static_cast<double> (facets.size()));
+	normal = normal.mult(1.0/static_cast<double> (facets.size()));
+
+	//check orientation vs centroid
+	Vec3d centroid = meshCentroid();
+	Vec3d diff = centroid.minus(n1->getCoordinates());
+	if (diff.dot(normal) < 0) normal = normal.mult(-1.0);	
 
 	return normal;
 }
@@ -222,7 +288,7 @@ void SphereFiller::parseInputFile (bool load_all)  {
 				meshroster.push_back(mesh);
 			} else {
 				//process
-				mesh.buildSpheres();
+				mesh.buildSpheres(nSphere);
 			}
 		}
 				
