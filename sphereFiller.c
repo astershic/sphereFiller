@@ -54,7 +54,7 @@ int main(int argc, const char *argv[]) {
 	//build Spheres
 	if (load_all) {
 		for (unsigned i = 0; i < sf.meshroster.size(); ++i) {
-			sf.meshroster[i].buildSpheres(sf.nSphere);
+			sf.meshroster[i].buildSpheres(sf.nSphere, sf.inFile);
 		}
 	}
 
@@ -104,7 +104,7 @@ template <class T> void deleteObjects (map<int,T*> a) {
 	return;
 }
 
-void Mesh::buildSpheres(int nSphere) {
+void Mesh::buildSpheres(int nSphere, string inFile) {
 
 	vector<int> idList;
 	vector<Node*> bases;
@@ -157,11 +157,14 @@ void Mesh::buildSpheres(int nSphere) {
 		idList.push_back(sph1.getBase()->getID());
 	}
 
+	//write spheres to file
+	string outFile = inFile.substr(0,inFile.size()-3) + "out";
+	ofstream myfile;
+	myfile.open (outFile.c_str(), ios::app);
 	for (unsigned i = 0; i < sphereList.size(); ++i) {
-
-	//write spheres to file - TODO
-
+		myfile << sphereList[i].print() << endl;
 	}
+	myfile.close();
 
 }
 
@@ -288,7 +291,7 @@ void SphereFiller::parseInputFile (bool load_all)  {
 				meshroster.push_back(mesh);
 			} else {
 				//process
-				mesh.buildSpheres(nSphere);
+				mesh.buildSpheres(nSphere, inFile);
 			}
 		}
 				

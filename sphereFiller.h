@@ -241,7 +241,7 @@ public:
 	void buildNodeGraph();
 	void printNodeGraph();
 //	void buildMeshes();
-	void buildSpheres(int nSpheres);
+	void buildSpheres(int nSpheres, string inFile);
 	Vec3d meshCentroid() {
 		if (&centroid) return centroid;
 		centroid = Vec3d(0.0,0.0,0.0);
@@ -298,12 +298,16 @@ public:
 		centroid = base->getCoordinates();
 		centroid = centroid.plus(normal.mult(direction*inrad));
 		radius = inrad;
+
+		mass = 1.0;
 	};
 
 	void setRadius(double inrad) {
 		radius = inrad;
 		centroid = base->getCoordinates();
 		centroid = centroid.plus(normal.mult(dir*inrad));	
+
+		mass = 1.0;
 	};
 	void setCentroid(Vec3d invec) {centroid = invec;};
 	double getRadius() {return radius;};
