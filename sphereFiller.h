@@ -32,6 +32,7 @@ using namespace::std;
 class Node;
 class Facet;
 class Mesh;
+class Sphere;
 
 class Vec3d {
 public:
@@ -54,7 +55,10 @@ public:
 	Vec3d minus(Vec3d in) {return Vec3d(x-in.x,y-in.y,z-in.z);};
 	double dot(Vec3d in) {return (x*in.x + y*in.y + z*in.z);};
 	Vec3d cross(Vec3d in) {
-		return Vec3d(y*in.z - z*in.y, z*in.x - x*in.z, x*in.y-y*in.x);
+		Vec3d crossV = Vec3d(y*in.z - z*in.y, z*in.x - x*in.z, x*in.y-y*in.x);
+		//normalize
+		crossV = crossV.mult(1.0/crossV.norm());
+		return crossV;
 	};
 	Vec3d mult(double mul) {
 		return Vec3d(x*mul,y*mul,z*mul);
@@ -232,10 +236,22 @@ public:
 	map<int, Node*> noderoster;
 	map<int, Facet*> facetroster;
 
+	bool clearSphere(Sphere* sph);
+	void bisectRadius(Sphere* sph, double rSmall, double rBig, int count);
 	void buildNodeGraph();
 	void printNodeGraph();
 //	void buildMeshes();
-	void buildSpheres();
+	void buildSpheres(int nSpheres);
+	Vec3d meshCentroid() {
+		if (&centroid) return centroid;
+		centroid = Vec3d(0.0,0.0,0.0);
+		for(map<int,Node*>::iterator it = noderoster.begin(); it != noderoster.end(); it++) {
+			Node* node = it->second;
+			centroid = centroid.plus(node->getCoordinates());
+		}
+		centroid = centroid.mult(1.0/static_cast<double>(noderoster.size()));
+		return centroid;
+	};
 	Vec3d generateNormal(Node* node);
 	void removeConnected(set<Node*>& nodework, Node* node);
 /*
@@ -255,7 +271,7 @@ public:
 private:
 //	vector<Node*> nodes;
 ////	vector<Facet*> facets;
-
+	Vec3d centroid;
 };
 
 
@@ -274,10 +290,25 @@ public:
 		radius = inrad;
 	};
 
-	void setRadius(double inrad) {radius = inrad;};
+    Sphere (Node* n1, double inrad, Vec3d inNormal, int direction) {
+		base = n1;
+		normal = inNormal;
+		dir = direction;
+		assert((direction == 1) || (direction == -1));
+		centroid = base->getCoordinates();
+		centroid = centroid.plus(normal.mult(direction*inrad));
+		radius = inrad;
+	};
+
+	void setRadius(double inrad) {
+		radius = inrad;
+		centroid = base->getCoordinates();
+		centroid = centroid.plus(normal.mult(dir*inrad));	
+	};
 	void setCentroid(Vec3d invec) {centroid = invec;};
 	double getRadius() {return radius;};
 	Vec3d getCentroid() {return centroid;};
+	Node* getBase() {return base;};
 
 	std::string print() {
 		std::stringstream sstm;
@@ -293,14 +324,19 @@ public:
 	bool containsPoint(double inx, double iny, double inz) {
 		return containsPoint(Vec3d(inx,iny,inz));
 	};
+	bool containsPoint(Node* node) {
+		return containsPoint(node->getCoordinates());
+	};
+
 
 
 private:
-
+	int dir;
 	double radius;
 	Vec3d centroid;
 	double mass;
-
+	Node* base;
+	Vec3d normal;
 };
 
 
