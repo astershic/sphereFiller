@@ -9,6 +9,5 @@ TODO:
 ->find volume using somethign like greens thm. 
 -make density an input
 -calculate and assign masses
--add copyrights to this code and yahooFinance
 -test out sphereFiller -> output to .mesh??
 -change output format to input for liggght
