@@ -330,7 +330,7 @@ public:
 		double x = centroid.getX();
 		double y = centroid.getY();
 		double z = centroid.getZ();
-		sstm << radius << " " << density << " " << x << " " << y << " " << z << endl;
+		sstm << radius*2.0 << " " << density << " " << x << " " << y << " " << z << endl;
 		return sstm.str();
 	};
 
