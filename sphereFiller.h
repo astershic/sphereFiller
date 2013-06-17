@@ -2,10 +2,11 @@
 
   Class <sphereFiller> 
 
-  Author: Andrew Stershic
+  Author: Andrew J. Stershic
           Duke Computational Mechanics Lab (DCML)
           Duke University - Durham, NC (USA)
   E-mail: ajs84@duke.edu
+  Web:    www.duke.edu/~ajs84
 
   Produced at: Oak Ridge National Lab (ORNL) as part of DOE CSGF practicum
 
