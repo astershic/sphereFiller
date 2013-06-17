@@ -12,6 +12,15 @@
   Copyright (c) 2013 Andrew Stershic. All rights reserved. No warranty. No
   liability.
 
+  *Please cite ALL use of code in academic works, presentations, and
+  publications, an example template of which is given by:
+  http://lrweb.beds.ac.uk/guides/ref/cite_computer_program
+
+  *Please cite the J. Ferellec, whose works underlie this code:
+   Ferellec, J. & McDowell, G. (2010). Geotechnique 60, No. 3, 227–232
+   [doi: 10.1680/geot.9.T.015]
+  
+
 *******************************************************************************/
 #include "sphereFiller.h"
 #include <iostream>
