@@ -58,7 +58,7 @@ int main(int argc, const char *argv[]) {
 	}
 
 	//load all then process all, or do one at a time?
-	bool load_all = true;
+	bool load_all = false;
 
 	//parse input file, save nodes and facets
 	sf.parseInputFile(load_all);
@@ -126,7 +126,7 @@ void Mesh::buildSpheres(int nSphere, double minDist, string inFile) {
 	for (int i = 0; i < nSphere; ++i) {
 
 		//pick random nodes
-		map<int,Node*>::iterator item = noderoster.begin();
+		map<int,Node*>::iterator item;
 		Node* n1; int id;
 
 		//check valid base node generation
@@ -134,6 +134,7 @@ void Mesh::buildSpheres(int nSphere, double minDist, string inFile) {
 		bool okay2 = false;
 		while (!okay1 || !okay2) {
 
+			item = noderoster.begin();
 			std::advance( item, rand() % noderoster.size() );
 			n1 = item->second;
 			id = item->first;
