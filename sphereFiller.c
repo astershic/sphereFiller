@@ -182,7 +182,7 @@ void Mesh::buildSpheres(int nSphere, double minDist, string inFile) {
 	ofstream myfile;
 	myfile.open (outFile.c_str(), ios::app);
 	for (unsigned i = 0; i < sphereList.size(); ++i) {
-		myfile << sphereList[i].print() << endl;
+		myfile << sphereList[i].print();
 	}
 	myfile.close();
 
