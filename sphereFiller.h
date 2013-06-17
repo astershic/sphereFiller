@@ -325,8 +325,12 @@ public:
 	Node* getBase() {return base;};
 
 	std::string print() {
+		calcDensity();
 		std::stringstream sstm;
-		sstm << centroid.print() << " , " << radius << " , " << mass;
+		double x = centroid.getX();
+		double y = centroid.getY();
+		double z = centroid.getZ();
+		sstm << radius << " " << density << " " << x << " " << y << " " << z << endl;
 		return sstm.str();
 	};
 
@@ -349,8 +353,15 @@ private:
 	double radius;
 	Vec3d centroid;
 	double mass;
+	double density;
 	Node* base;
 	Vec3d normal;
+
+	void calcDensity() {
+		double PI = 3.14159265359;
+		double volume = PI*4.0/3.0*radius*radius*radius;
+		density = mass/volume;
+	}
 };
 
 
