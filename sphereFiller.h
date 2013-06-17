@@ -79,7 +79,7 @@ public:
 		y = iny;
 		z = inz;
 	};
-	std::string print() const {
+	std::string print() {
 		std::stringstream sstm;
 		sstm << "( " << x << ", " << y << ", " << z << ")";
 		return sstm.str();
@@ -135,7 +135,7 @@ public:
 
 	vector<Facet*> getFacets() {return facets;};
 	void addFacet (Facet * in) {facets.push_back(in);};
-	Vec3d getCoordinates () const {return coordinates;};
+	Vec3d getCoordinates () {return coordinates;};
 	void setCoordinates (Vec3d in) {coordinates = in;};
 
 	int getID() {return id;}
@@ -150,7 +150,7 @@ public:
 		return diff.norm();
 	};
 
-	string print() const {
+	string print() {
 		std::stringstream sstm;
 		sstm << id << ": " << coordinates.print();
 		return sstm.str();
@@ -212,7 +212,7 @@ public:
 		id = inID;
 	};
 
-	string print() const {
+	string print() {
 		std::stringstream sstm;
 		assert(nodes[0]);
 		assert(nodes[1]);
@@ -221,7 +221,7 @@ public:
 		return sstm.str();
 	};
 
-	string printID() const {
+	string printID() {
 		std::stringstream sstm;
 		assert(nodes[0]);
 		assert(nodes[1]);
