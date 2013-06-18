@@ -40,22 +40,30 @@ using namespace std;
 
 int main(int argc, const char *argv[]) {
 	SphereFiller sf;
+
+	assert(argc > 1);
 	if (argc > 1) {
 		sf.inFile = argv[1];
-		cout << " input file = " << sf.inFile << endl;
 	}
+	cout << " input file = " << sf.inFile << endl;
 
 	sf.nSphere = 1;
 	if (argc > 2) {
 		sf.nSphere = atoi(argv[2]);
-		cout << " number of spheres = " << sf.nSphere << endl;
 	}
+	cout << " number of spheres = " << sf.nSphere << endl;
+
+	sf.density = 1.0;
+	if (argc > 3) {
+		sf.density = atof(argv[3]);
+	}
+	cout << " density = " << sf.density << endl;
 
 	sf.minDist = 0.0;
-	if (argc > 3) {
-		sf.minDist = atof(argv[3]);
-		cout << " minimum distance = " << sf.minDist << endl;
+	if (argc > 4) {
+		sf.minDist = atof(argv[4]);
 	}
+	cout << " minimum distance = " << sf.minDist << endl;
 
 	//load all then process all, or do one at a time?
 	bool load_all = false;
@@ -66,7 +74,7 @@ int main(int argc, const char *argv[]) {
 	//build Spheres
 	if (load_all) {
 		for (unsigned i = 0; i < sf.meshroster.size(); ++i) {
-			sf.meshroster[i].buildSpheres(sf.nSphere, sf.minDist, sf.inFile);
+			sf.meshroster[i].buildSpheres(sf.density, sf.nSphere, sf.minDist, sf.inFile);
 		}
 	}
 

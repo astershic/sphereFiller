@@ -98,6 +98,7 @@ public:
     ~SphereFiller (){}; 
 
 	std::string inFile;
+	double density;
 	double minDist;
 	int nSphere;
 	vector<Mesh> meshroster;
@@ -251,7 +252,7 @@ public:
 	void buildNodeGraph();
 	void printNodeGraph();
 //	void buildMeshes();
-	void buildSpheres(int nSpheres, double minDist, string inFile);
+	void buildSpheres(double density, int nSpheres, double minDist, string inFile);
 	Vec3d meshCentroid() {
 		if (&centroid) return centroid;
 		centroid = Vec3d(0.0,0.0,0.0);
