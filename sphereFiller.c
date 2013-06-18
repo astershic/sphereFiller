@@ -136,7 +136,7 @@ double Mesh::calculateVolume() {
 		Vec3d facetCentroid = facet->getCentroid();
 		Vec3d diff = centroid.minus(facetCentroid);
 		//want an outward norm - (sphere generation needs an inward norm)
-		if (diff.dot(norm) > 0) norm = norm.mult(-1.0);	
+//		if (diff.dot(norm) > 0) norm = norm.mult(-1.0);	
 
 		//get area
 		double area = facet->getArea();
@@ -206,7 +206,6 @@ void Mesh::buildSpheres(double density, int nSphere, double minDist, string inFi
 
 		//get right size of sphere
 		bisectRadius(&sph1,min*0.1*0.5,max*10.0*0.5,0);
-		if (sph1.getRadius() == 0.5 * pow(min*0.1,1./1024) * pow(max*10.,1023./1024)) {cout << "max radius generated" << endl;}
 
 //		cout << "radius = " << sph1.getRadius() << endl;
 //		cout << "center = " << sph1.getCentroid().print() << endl;
@@ -272,8 +271,8 @@ Vec3d Mesh::generateNormal(Node* n1) {
 		Vec3d norm = facets[i]->normal();
 		//reverse orientation if necessary
 		Vec3d scaled = normal.mult(1.0/static_cast<double> (i));
-		double dot = scaled.dot(norm);
-		if (dot < 0) norm = norm.mult(-1.0);
+//		double dot = scaled.dot(norm);
+//		if (dot < 0) norm = norm.mult(-1.0);
 		normal = normal.plus(norm); 
 	}
 
@@ -282,7 +281,8 @@ Vec3d Mesh::generateNormal(Node* n1) {
 	//check orientation vs centroid - need an inward norm - TODO
 	Vec3d centroid = meshCentroid();
 	Vec3d diff = centroid.minus(n1->getCoordinates());
-	if (diff.dot(normal) < 0) normal = normal.mult(-1.0);	
+	normal = normal.mult(-1.0);
+//	if (diff.dot(normal) < 0) normal = normal.mult(-1.0);	
 
 	return normal;
 }

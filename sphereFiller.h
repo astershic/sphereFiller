@@ -189,8 +189,8 @@ public:
 		Vec3d c1 = nodes[0]->getCoordinates();
 		Vec3d c2 = nodes[1]->getCoordinates();
 		Vec3d c3 = nodes[2]->getCoordinates();
-		Vec3d v1 = c1.minus(c2);
-		Vec3d v2 = c1.minus(c3);
+		Vec3d v1 = c1.minus(c3);
+		Vec3d v2 = c2.minus(c3);
 		Vec3d x = v1.cross(v2);
 		//normalize vector
 		return x.mult(1.0/x.norm());
