@@ -66,8 +66,6 @@ public:
 	double dot(Vec3d in) {return (x*in.x + y*in.y + z*in.z);};
 	Vec3d cross(Vec3d in) {
 		Vec3d crossV = Vec3d(y*in.z - z*in.y, z*in.x - x*in.z, x*in.y-y*in.x);
-		//normalize
-		crossV = crossV.mult(1.0/crossV.norm());
 		return crossV;
 	};
 	Vec3d mult(double mul) {
@@ -193,7 +191,9 @@ public:
 		Vec3d c3 = nodes[2]->getCoordinates();
 		Vec3d v1 = c1.minus(c2);
 		Vec3d v2 = c1.minus(c3);
-		return v1.cross(v2);
+		Vec3d x = v1.cross(v2);
+		//normalize vector
+		return x.mult(1.0/x.norm());
 	};
 
 	void addNode (Node* inNode) {
@@ -231,6 +231,28 @@ public:
 		return sstm.str();
 	};
 
+	Vec3d getCentroid() {
+		assert(nodes.size() == 3);
+		Vec3d c1 = nodes[0]->getCoordinates();
+		Vec3d c2 = nodes[1]->getCoordinates();
+		Vec3d c3 = nodes[2]->getCoordinates();
+		Vec3d out = c1.plus(c2);
+		out = out.plus(c3);
+		out = out.mult(1.0/3.0);
+		return out;
+	}
+
+	double getArea() {
+		assert(nodes.size() == 3);
+		Vec3d c1 = nodes[0]->getCoordinates();
+		Vec3d c2 = nodes[1]->getCoordinates();
+		Vec3d c3 = nodes[2]->getCoordinates();
+		Vec3d v1 = c1.minus(c2);
+		Vec3d v2 = c1.minus(c3);
+		Vec3d x = v1.cross(v2);
+		return 0.5*x.norm();
+	}
+
 
 private:
 	vector<Node*> nodes;
@@ -265,6 +287,8 @@ public:
 	};
 	Vec3d generateNormal(Node* node);
 	void removeConnected(set<Node*>& nodework, Node* node);
+
+	double calculateVolume();
 /*
 	void addNode (Node* inNode) {
 		nodes.push_back(inNode);
@@ -291,17 +315,19 @@ public:
     Sphere (){};
     ~Sphere (){}; 
 
-    Sphere (Vec3d invec, double inrad) {
+    Sphere (Vec3d invec, double inrad, double inmass) {
 		centroid = invec;
 		radius = inrad;
+		mass = inmass;
 	};
 
-    Sphere (Node* n1, double inrad) {
+    Sphere (Node* n1, double inrad, double inmass) {
 		centroid = n1->getCoordinates();
 		radius = inrad;
+		mass = inmass;
 	};
 
-    Sphere (Node* n1, double inrad, Vec3d inNormal, int direction) {
+    Sphere (Node* n1, double inrad, Vec3d inNormal, int direction, double inmass) {
 		base = n1;
 		normal = inNormal;
 		dir = direction;
@@ -309,16 +335,13 @@ public:
 		centroid = base->getCoordinates();
 		centroid = centroid.plus(normal.mult(direction*inrad));
 		radius = inrad;
-
-		mass = 1.0;
+		mass = inmass;
 	};
 
 	void setRadius(double inrad) {
 		radius = inrad;
 		centroid = base->getCoordinates();
 		centroid = centroid.plus(normal.mult(dir*inrad));	
-
-		mass = 1.0;
 	};
 	void setCentroid(Vec3d invec) {centroid = invec;};
 	double getRadius() {return radius;};

@@ -124,12 +124,42 @@ template <class T> void deleteObjects (map<int,T*> a) {
 	return;
 }
 
-void Mesh::buildSpheres(int nSphere, double minDist, string inFile) {
+double Mesh::calculateVolume() {
+	double volume = 0.0;
+	for(map<int,Facet*>::iterator it = facetroster.begin(); it != facetroster.end(); it++) {
+		Facet* facet = it->second;
+
+		//get normal
+		Vec3d norm = facet->normal();
+		//check orientation vs centroid - TODO
+		Vec3d centroid = meshCentroid();
+		Vec3d facetCentroid = facet->getCentroid();
+		Vec3d diff = centroid.minus(facetCentroid);
+		//want an outward norm - (sphere generation needs an inward norm)
+		if (diff.dot(norm) > 0) norm = norm.mult(-1.0);	
+
+		//get area
+		double area = facet->getArea();
+assert(area>0.0);
+
+		//add to volume
+		double dv = facetCentroid.dot(norm)*area*1.0/3.0;		
+		volume += dv;
+	}
+	cout << "*Mesh Volume = " << volume << endl;
+	return volume;
+}
+
+void Mesh::buildSpheres(double density, int nSphere, double minDist, string inFile) {
 
 	vector<int> idList;
 	vector<Node*> bases;
 	vector<Sphere> sphereList;
-	
+
+	//find total volume of particle
+	double totalVolume = calculateVolume();
+	//use Ferellec's correction - all spheres are same mass regardless of size
+	double massSphere = totalVolume * density / static_cast<double>(nSphere);
 
 	for (int i = 0; i < nSphere; ++i) {
 
@@ -172,10 +202,11 @@ void Mesh::buildSpheres(int nSphere, double minDist, string inFile) {
 		//find normal direction
 		Vec3d normal = generateNormal(n1);
 		//make spheres - iteratively blowing them up
-		Sphere sph1 = Sphere(n1, min, normal, 1);
+		Sphere sph1 = Sphere(n1, min, normal, 1, massSphere);
 
 		//get right size of sphere
 		bisectRadius(&sph1,min*0.1*0.5,max*10.0*0.5,0);
+		if (sph1.getRadius() == 0.5 * pow(min*0.1,1./1024) * pow(max*10.,1023./1024)) {cout << "max radius generated" << endl;}
 
 //		cout << "radius = " << sph1.getRadius() << endl;
 //		cout << "center = " << sph1.getCentroid().print() << endl;
@@ -248,7 +279,7 @@ Vec3d Mesh::generateNormal(Node* n1) {
 
 	normal = normal.mult(1.0/static_cast<double> (facets.size()));
 
-	//check orientation vs centroid
+	//check orientation vs centroid - need an inward norm - TODO
 	Vec3d centroid = meshCentroid();
 	Vec3d diff = centroid.minus(n1->getCoordinates());
 	if (diff.dot(normal) < 0) normal = normal.mult(-1.0);	
@@ -322,14 +353,14 @@ void SphereFiller::parseInputFile (bool load_all)  {
 				meshroster.push_back(mesh);
 			} else {
 				//process
-				mesh.buildSpheres(nSphere, minDist, inFile);
+				mesh.buildSpheres(density, nSphere, minDist, inFile);
 			}
 		}
 				
 	}
 
 	cout << "*INPUT FILE PARSED" << endl;
-	cout << "    mesh roster size = " << meshroster.size() << endl;	
+	if (load_all) cout << "    mesh roster size = " << meshroster.size() << endl;	
 	for (unsigned i = 0; i < meshroster.size(); ++i) {
 		cout << "    node roster size = " << meshroster[i].noderoster.size() << endl;
 		cout << "    facet roster size = " << meshroster[i].facetroster.size() << endl;
