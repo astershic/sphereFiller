@@ -327,13 +327,11 @@ public:
 		mass = inmass;
 	};
 
-    Sphere (Node* n1, double inrad, Vec3d inNormal, int direction, double inmass) {
+    Sphere (Node* n1, double inrad, Vec3d inNormal, double inmass) {
 		base = n1;
 		normal = inNormal;
-		dir = direction;
-		assert((direction == 1) || (direction == -1));
 		centroid = base->getCoordinates();
-		centroid = centroid.plus(normal.mult(direction*inrad));
+		centroid = centroid.plus(normal.mult(inrad));
 		radius = inrad;
 		mass = inmass;
 	};
@@ -341,7 +339,7 @@ public:
 	void setRadius(double inrad) {
 		radius = inrad;
 		centroid = base->getCoordinates();
-		centroid = centroid.plus(normal.mult(dir*inrad));	
+		centroid = centroid.plus(normal.mult(inrad));	
 	};
 	void setCentroid(Vec3d invec) {centroid = invec;};
 	double getRadius() {return radius;};
@@ -374,7 +372,6 @@ public:
 
 
 private:
-	int dir;
 	double radius;
 	Vec3d centroid;
 	double mass;

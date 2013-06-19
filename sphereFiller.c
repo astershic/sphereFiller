@@ -202,7 +202,7 @@ void Mesh::buildSpheres(double density, int nSphere, double minDist, string inFi
 		//find normal direction
 		Vec3d normal = generateNormal(n1);
 		//make spheres - iteratively blowing them up
-		Sphere sph1 = Sphere(n1, min, normal, 1, massSphere);
+		Sphere sph1 = Sphere(n1, min, normal, massSphere);
 
 		//get right size of sphere
 		bisectRadius(&sph1,min*0.1*0.5,max*10.0*0.5,0);
