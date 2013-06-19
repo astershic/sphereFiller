@@ -98,7 +98,7 @@ public:
 	std::string inFile;
 	double density;
 	double minDist;
-	int nSphere;
+	long nSphere;
 	vector<Mesh> meshroster;
 
 	void parseInputFile(bool load_all);
@@ -116,14 +116,14 @@ public:
     Node (double x, double y, double z) {
 		coordinates = Vec3d(x,y,z);
 	};
-    Node (int inID){
+    Node (long inID){
 		id = inID;
 	};
-    Node (int inID, Vec3d in) {
+    Node (long inID, Vec3d in) {
 		coordinates = in;
 		id = inID;
 	};
-    Node (int inID, double x, double y, double z) {
+    Node (long inID, double x, double y, double z) {
 		coordinates = Vec3d(x,y,z);
 		id = inID;
 	};
@@ -137,8 +137,8 @@ public:
 	Vec3d getCoordinates () {return coordinates;};
 	void setCoordinates (Vec3d in) {coordinates = in;};
 
-	int getID() {return id;}
-	void setID (int inID) {
+	long getID() {return id;}
+	void setID (long inID) {
 		id = inID;
 	};
 
@@ -158,7 +158,7 @@ public:
 private:
 	vector<Facet*> facets;
 	Vec3d coordinates;
-	int id;
+	long id;
 
 };
 
@@ -167,7 +167,7 @@ public:
     Facet (){};
     ~Facet (){}; 
 
-    Facet (int inID){
+    Facet (long inID){
 		id = inID;
 	};
 
@@ -177,7 +177,7 @@ public:
 		nodes.push_back(n3);
 	};
 
-	Facet(int inID, Node* n1, Node* n2, Node* n3) {
+	Facet(long inID, Node* n1, Node* n2, Node* n3) {
 		nodes.push_back(n1);
 		nodes.push_back(n2);
 		nodes.push_back(n3);
@@ -208,8 +208,8 @@ public:
 		return nodes[num];
 	};
 
-	int getID() {return id;}
-	void setID (int inID) {
+	long getID() {return id;}
+	void setID (long inID) {
 		id = inID;
 	};
 
@@ -256,7 +256,7 @@ public:
 
 private:
 	vector<Node*> nodes;
-	int id;
+	long id;
 };
 
 class Mesh {
@@ -266,8 +266,8 @@ public:
     ~Mesh (){}; 
 
 	int tag;
-	map<int, Node*> noderoster;
-	map<int, Facet*> facetroster;
+	map<long, Node*> noderoster;
+	map<long, Facet*> facetroster;
 
 	bool clearSphere(Sphere* sph);
 	void bisectRadius(Sphere* sph, double rSmall, double rBig, int count);
@@ -278,7 +278,7 @@ public:
 	Vec3d meshCentroid() {
 		if (&centroid) return centroid;
 		centroid = Vec3d(0.0,0.0,0.0);
-		for(map<int,Node*>::iterator it = noderoster.begin(); it != noderoster.end(); it++) {
+		for(map<long,Node*>::iterator it = noderoster.begin(); it != noderoster.end(); it++) {
 			Node* node = it->second;
 			centroid = centroid.plus(node->getCoordinates());
 		}

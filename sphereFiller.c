@@ -116,8 +116,8 @@ vector<string> strSplit (string in)  {
 }
 
 
-template <class T> void deleteObjects (map<int,T*> a) {
-	for(typename map<int,T*>::iterator it = a.begin(); it != a.end(); it++) {
+template <class T> void deleteObjects (map<long,T*> a) {
+	for(typename map<long,T*>::iterator it = a.begin(); it != a.end(); it++) {
 		T* ptr = it->second;
 		delete &ptr;
 	}
@@ -126,7 +126,7 @@ template <class T> void deleteObjects (map<int,T*> a) {
 
 double Mesh::calculateVolume() {
 	double volume = 0.0;
-	for(map<int,Facet*>::iterator it = facetroster.begin(); it != facetroster.end(); it++) {
+	for(map<long,Facet*>::iterator it = facetroster.begin(); it != facetroster.end(); it++) {
 		Facet* facet = it->second;
 
 		//get normal
@@ -152,7 +152,7 @@ assert(area>0.0);
 
 void Mesh::buildSpheres(double density, int nSphere, double minDist, string inFile) {
 
-	vector<int> idList;
+	vector<long> idList;
 	vector<Node*> bases;
 	vector<Sphere> sphereList;
 
@@ -164,8 +164,8 @@ void Mesh::buildSpheres(double density, int nSphere, double minDist, string inFi
 	for (int i = 0; i < nSphere; ++i) {
 
 		//pick random nodes
-		map<int,Node*>::iterator item;
-		Node* n1; int id;
+		map<long,Node*>::iterator item;
+		Node* n1; long id;
 
 		//check valid base node generation
 		bool okay1 = false;
@@ -191,7 +191,7 @@ void Mesh::buildSpheres(double density, int nSphere, double minDist, string inFi
 		//max and min distance
 		double max = 0.0;
 		double min = std::numeric_limits<double>::max();
-		for(map<int,Node*>::iterator it = noderoster.begin(); it != noderoster.end(); it++) {
+		for(map<long,Node*>::iterator it = noderoster.begin(); it != noderoster.end(); it++) {
 			if (it->first == id) continue;
 			Node* n = it->second;
 			double dist = n1->dist(n);
@@ -249,7 +249,7 @@ void Mesh::bisectRadius(Sphere* sph, double rSmall, double rBig, int count) {
 
 bool Mesh::clearSphere(Sphere* sph) {
 	int count = 0;
-	for(map<int,Node*>::iterator it = noderoster.begin(); it != noderoster.end(); it++) {
+	for(map<long,Node*>::iterator it = noderoster.begin(); it != noderoster.end(); it++) {
 		Node* node = it->second;
 		
 		//don't count it if it's the base point
@@ -318,12 +318,12 @@ void SphereFiller::parseInputFile (bool load_all)  {
 			if (node && !element) {
 				//make node
 				vector<string> split = strSplit(line);
-				int tag = atoi(split[0].c_str());
+				long tag = atol(split[0].c_str());
 				double x = atof(split[1].c_str());			
 				double y = atof(split[2].c_str());
 				double z = atof(split[3].c_str());
 				Node* node = new Node(tag,x,y,z);
-				mesh.noderoster.insert(pair<int,Node*> (tag,node));
+				mesh.noderoster.insert(pair<long,Node*> (tag,node));
 //				mesh.addNode(&node);
 			}
 
@@ -333,12 +333,12 @@ void SphereFiller::parseInputFile (bool load_all)  {
 				
 				//check for triangle element - 3 nodes
 				if (split.size() != 4) break;
-				int tag = atoi(split[0].c_str()); 
-				int t1 = atoi(split[1].c_str()); Node* n1 = mesh.noderoster[t1];
-				int t2 = atoi(split[2].c_str()); Node* n2 = mesh.noderoster[t2];
-				int t3 = atoi(split[3].c_str()); Node* n3 = mesh.noderoster[t3];
+				long tag = atol(split[0].c_str()); 
+				long t1 = atol(split[1].c_str()); Node* n1 = mesh.noderoster[t1];
+				long t2 = atol(split[2].c_str()); Node* n2 = mesh.noderoster[t2];
+				long t3 = atol(split[3].c_str()); Node* n3 = mesh.noderoster[t3];
 				Facet* facet = new Facet(tag, n1, n2, n3);
-				mesh.facetroster.insert(pair<int,Facet*> (tag,facet));
+				mesh.facetroster.insert(pair<long,Facet*> (tag,facet));
 				n1->addFacet(facet);
 				n2->addFacet(facet);
 				n3->addFacet(facet);
@@ -371,7 +371,7 @@ void SphereFiller::parseInputFile (bool load_all)  {
 
 void Mesh::buildNodeGraph() {
 
-	for(map<int,Facet*>::iterator it = facetroster.begin(); it != facetroster.end(); it++) {
+	for(map<long,Facet*>::iterator it = facetroster.begin(); it != facetroster.end(); it++) {
 		Facet* facet = it->second;
 		Node* n1 = facet->getNode(0);
 		Node* n2 = facet->getNode(1);
@@ -388,7 +388,7 @@ void Mesh::buildNodeGraph() {
 
 void Mesh::printNodeGraph() {
 
-	for(map<int,Node*>::iterator it = noderoster.begin(); it != noderoster.end(); it++) {
+	for(map<long,Node*>::iterator it = noderoster.begin(); it != noderoster.end(); it++) {
 
 		Node* node = it->second;
 		cout << endl;
@@ -404,7 +404,7 @@ void SphereFiller::buildMeshes() {
 	
 	//copy map
 	set<Node*> nodelist;	
-    for( map<int, Node>::iterator it = noderoster.begin(); it != noderoster.end(); ++it ) {
+    for( map<long, Node>::iterator it = noderoster.begin(); it != noderoster.end(); ++it ) {
     	nodelist.insert( &it->second );
     }
 
