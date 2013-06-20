@@ -13,11 +13,17 @@
   Copyright (c) 2013 Andrew Stershic. All rights reserved. No warranty. No
   liability.
 
+	This program is free software: you can redistribute it and/or modify it under 		the terms of the GNU General Public License as published by the Free Software 		Foundation, either version 3 of the License, or (at your option) any later 			version.
+
+	This program is distributed in the hope that it will be useful, but WITHOUT ANY 	WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 	PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License along with 		this program.  If not, see <http://www.gnu.org/licenses/>.
+
   *Please cite ALL use of code in academic works, presentations, and
   publications, an example template of which is given by:
   http://lrweb.beds.ac.uk/guides/ref/cite_computer_program
 
-  *Please cite the J. Ferellec, whose works underlie this code:
+  *Please cite J. Ferellec, whose works underlie this code:
    Ferellec, J. & McDowell, G. (2010). Geotechnique 60, No. 3, 227–232
    [doi: 10.1680/geot.9.T.015]
   
