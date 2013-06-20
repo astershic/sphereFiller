@@ -20,6 +20,6 @@ prints: diameter, density, xc, yc, zc
 
 
 TODO:
--figure out why some very large particles are made
+?-minimum particle size
 ?-change output format to input for liggghts
 ?-parallelize
