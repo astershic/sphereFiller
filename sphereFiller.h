@@ -24,7 +24,7 @@
   http://lrweb.beds.ac.uk/guides/ref/cite_computer_program
 
   *Please cite J. Ferellec, whose works underlie this code:
-   Ferellec, J. & McDowell, G. (2010). Geotechnique 60, No. 3, 227–232
+   Ferellec, J., and G. McDowell. "Modelling realistic shape and particle inertia in DEM." Géotechnique 60.3 (2010): 227-232.
    [doi: 10.1680/geot.9.T.015]
   
 
