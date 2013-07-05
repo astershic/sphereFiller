@@ -311,6 +311,7 @@ void SphereFiller::parseInputFile (bool load_all)  {
 		while (getline(infile,line)) {
 			if (line.substr(0,5) == "*Node") {
 				node = true;
+				element = false;
 				continue;
 			}
 			if (line.substr(0,8) == "*Element") {
