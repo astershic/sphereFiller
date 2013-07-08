@@ -80,7 +80,7 @@ int main(int argc, const char *argv[]) {
 	//build Spheres
 	if (load_all) {
 		for (unsigned i = 0; i < sf.meshroster.size(); ++i) {
-			sf.meshroster[i].buildSpheres(sf.density, sf.nSphere, sf.minDist, sf.inFile);
+			sf.meshroster[i].buildSpheres(i, sf.density, sf.nSphere, sf.minDist, sf.inFile);
 		}
 	}
 
@@ -130,6 +130,11 @@ template <class T> void deleteObjects (map<long,T*> a) {
 	return;
 }
 
+template <class T, class U> T min(T a, U b) {
+	if (a > b) return b;
+	else return a;
+}
+
 double Mesh::calculateVolume() {
 	double volume = 0.0;
 	for(map<long,Facet*>::iterator it = facetroster.begin(); it != facetroster.end(); it++) {
@@ -156,7 +161,7 @@ assert(area>0.0);
 	return volume;
 }
 
-void Mesh::buildSpheres(double density, int nSphere, double minDist, string inFile) {
+void Mesh::buildSpheres(int particleNum, double density, int nSphere, double minDist, string inFile) {
 
 	vector<long> idList;
 	vector<Node*> bases;
@@ -167,7 +172,7 @@ void Mesh::buildSpheres(double density, int nSphere, double minDist, string inFi
 	//use Ferellec's correction - all spheres are same mass regardless of size
 	double massSphere = totalVolume * density / static_cast<double>(nSphere);
 
-	for (int i = 0; i < nSphere; ++i) {
+	for (int i = 0; i < min(nSphere,noderoster.size()); ++i) {
 
 		//pick random nodes
 		map<long,Node*>::iterator item;
@@ -227,11 +232,11 @@ void Mesh::buildSpheres(double density, int nSphere, double minDist, string inFi
 	ofstream myfile;
 	myfile.open (outFile.c_str(), ios::app);
 	for (unsigned i = 0; i < sphereList.size(); ++i) {
-		myfile << sphereList[i].print();
+		myfile << particleNum << " " << sphereList[i].print();
 	}
 	myfile.close();
 
-	cout << "*SPHERES BUILT" << endl;
+	cout << "*SPHERES BUILT - " << min(nSphere,noderoster.size()) << endl;
 
 }
 
@@ -296,6 +301,8 @@ Vec3d Mesh::generateNormal(Node* n1) {
 void SphereFiller::parseInputFile (bool load_all)  {
 	string path = this->inFile;
 	ifstream infile(path.c_str());
+	int particleNum = 0;
+
 	while (!infile.eof()) {
 		Mesh mesh = Mesh();
 
@@ -360,7 +367,8 @@ void SphereFiller::parseInputFile (bool load_all)  {
 				meshroster.push_back(mesh);
 			} else {
 				//process
-				mesh.buildSpheres(density, nSphere, minDist, inFile);
+				particleNum++;
+				mesh.buildSpheres(particleNum, density, nSphere, minDist, inFile);
 			}
 		}
 				
