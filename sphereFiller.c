@@ -170,9 +170,10 @@ void Mesh::buildSpheres(int particleNum, double density, int nSphere, double min
 	//find total volume of particle
 	double totalVolume = calculateVolume();
 	//use Ferellec's correction - all spheres are same mass regardless of size
-	double massSphere = totalVolume * density / static_cast<double>(nSphere);
+	int actualNSphere = min(nSphere,noderoster.size());
+	double massSphere = totalVolume * density / static_cast<double>(actualNSphere);
 
-	for (int i = 0; i < min(nSphere,noderoster.size()); ++i) {
+	for (int i = 0; i < actualNSphere; ++i) {
 
 		//pick random nodes
 		map<long,Node*>::iterator item;
