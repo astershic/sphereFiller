@@ -375,6 +375,8 @@ void SphereFiller::parseInputFile (bool load_all)  {
 				
 	}
 
+	infile.close();
+
 	cout << "*INPUT FILE PARSED" << endl;
 	if (load_all) cout << "    mesh roster size = " << meshroster.size() << endl;	
 	for (unsigned i = 0; i < meshroster.size(); ++i) {
