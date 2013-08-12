@@ -89,19 +89,19 @@ int main(int argc, const char *argv[]) {
 	//build Spheres
 	if (load_all) {
 		for (unsigned i = 0; i < sf.meshroster.size(); ++i) {
-			sf.meshroster[i].buildSpheres(i, sf.density, sf.nSphere, sf.minDist, sf.inFile);
+			sf.meshroster[i].buildSpheres(sf.meshroster[i].tag, sf.density, sf.nSphere, sf.minDist, sf.inFile);
 		}
 	}
 
-	/*
-	//build nodal connectivity graph
-	sf.buildNodeGraph(); //	sf.printNodeGraph();
+	//build library
+	if (sf.library) {
+		sf.buildLibrary();
+	}
 
-	// use graph theory to find individual particles
-	sf.buildMeshes();
-	*/
 	return 1;
 }
+
+/*Helper methods--------------------------------------------------------------*/
 
 template<class T> void printVector(vector<T> in) {
 	for (unsigned i = 0; i < in.size(); ++i) {
@@ -155,8 +155,11 @@ template <class T, class U> T min(T a, U b) {
 	else return a;
 }
 
+/*Mesh methods----------------------------------------------------------------*/
+
 double Mesh::calculateVolume() {
-	double volume = 0.0;
+
+	volume = 0.0;
 	for(map<long,Facet*>::iterator it = facetroster.begin(); it != facetroster.end(); it++) {
 		Facet* facet = it->second;
 
@@ -508,14 +511,16 @@ void SphereFiller::parseInputFile (bool load_all)  {
 		}
 	
 		//if mesh is not empty, save or process it
+		particleNum++;
+		mesh.tag = particleNum;
 		if (mesh.noderoster.size() > 0 && mesh.facetroster.size() > 0) {
 			if (load_all) {
 				//save
 				meshroster.push_back(mesh);
 			} else {
 				//process
-				particleNum++;
 				mesh.buildSpheres(particleNum, density, nSphere, minDist, inFile);
+				meshroster.push_back(mesh);
 			}
 		}
 				
@@ -527,42 +532,12 @@ void SphereFiller::parseInputFile (bool load_all)  {
 	if (load_all) cout << "    mesh roster size = " << meshroster.size() << endl;	
 	for (unsigned i = 0; i < meshroster.size(); ++i) {
 		cout << "    node roster size = " << meshroster[i].noderoster.size() << endl;
-		cout << "    facet roster size = " << meshroster[i].facetroster.size() << endl;
+		cout << "    facet/element roster size = " << meshroster[i].facetroster.size() << endl;
 	}
 
 	return;
 }
 
-void Mesh::buildNodeGraph() {
-
-	for(map<long,Facet*>::iterator it = facetroster.begin(); it != facetroster.end(); it++) {
-		Facet* facet = it->second;
-		Node* n1 = facet->getNode(0);
-		Node* n2 = facet->getNode(1);
-		Node* n3 = facet->getNode(2);
-		n1->neighbors.insert(n2); n1->neighbors.insert(n3);
-		n2->neighbors.insert(n1); n2->neighbors.insert(n3);
-		n3->neighbors.insert(n1); n3->neighbors.insert(n2);
-	}
-
-	cout << "*NODE GRAPH BUILT" << endl;
-	
-	return;
-}
-
-void Mesh::printNodeGraph() {
-
-	for(map<long,Node*>::iterator it = noderoster.begin(); it != noderoster.end(); it++) {
-
-		Node* node = it->second;
-		cout << endl;
-		cout << "<" << node->getID() << ">" << endl;
-		for (Node* n : node->neighbors){
-			cout << n->getID() << endl;
-		}
-	}
-
-}
 /*
 void SphereFiller::buildMeshes() {
 	
@@ -626,5 +601,4 @@ cout << node->getID() << endl;
 }
 */
 
-/*------------------------------ P R I V A T E -------------------------------*/
 

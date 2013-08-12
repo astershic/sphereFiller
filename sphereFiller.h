@@ -268,10 +268,10 @@ private:
 class Mesh {
 public:
     Mesh (){};
-    Mesh (int in){tag = in;};
+    Mesh (long in){tag = in;};
     ~Mesh (){}; 
 
-	int tag;
+	long tag;
 	map<long, Node*> noderoster;
 	map<long, Facet*> facetroster;
 
@@ -282,7 +282,7 @@ public:
 //	void buildMeshes();
 	void buildSpheres(int particleNum, double density, int nSpheres, double minDist, string inFile);
 	Vec3d meshCentroid() {
-		if (&centroid) return centroid;
+		//if (&centroid) return centroid;
 		centroid = Vec3d(0.0,0.0,0.0);
 		for(map<long,Node*>::iterator it = noderoster.begin(); it != noderoster.end(); it++) {
 			Node* node = it->second;
@@ -295,6 +295,14 @@ public:
 	void removeConnected(set<Node*>& nodework, Node* node);
 
 	double calculateVolume();
+
+	double getVolume() {
+		return volume;
+	}
+
+	Vec3d getCentroid() {
+		return centroid;
+	}
 /*
 	void addNode (Node* inNode) {
 		nodes.push_back(inNode);
@@ -313,6 +321,7 @@ private:
 //	vector<Node*> nodes;
 ////	vector<Facet*> facets;
 	Vec3d centroid;
+	double volume;
 };
 
 
