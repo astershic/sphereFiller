@@ -32,6 +32,7 @@
 #include "sphereFiller.h"
 #include <iostream>
 #include <fstream>
+#include <string.h>
 
 using namespace std;
 
@@ -70,6 +71,14 @@ int main(int argc, const char *argv[]) {
 		sf.minDist = atof(argv[4]);
 	}
 	cout << " minimum distance = " << sf.minDist << endl;
+
+	sf.library = false;
+	if (argc > 5) {
+		sf.library = atoi(argv[5]);
+	}
+	string libtext = "no";
+	if ( sf.library ) libtext = "yes";
+	cout << " make library = " << libtext << endl;
 
 	//load all then process all, or do one at a time?
 	bool load_all = false;
@@ -121,6 +130,17 @@ vector<string> strSplit (string in)  {
 	return out;
 }
 
+vector<string> strSplitSpaces (string in)  {
+	vector<string> out;
+	int index;
+	while ((index=in.find(" ")) >= 0) {
+		string mini = in.substr(0,index);
+		out.push_back(mini);
+		in = in.substr(index+1);
+	}
+	out.push_back(in);
+	return out;
+}
 
 template <class T> void deleteObjects (map<long,T*> a) {
 	for(typename map<long,T*>::iterator it = a.begin(); it != a.end(); it++) {
@@ -142,7 +162,7 @@ double Mesh::calculateVolume() {
 
 		//get normal
 		Vec3d norm = facet->normal();
-		//check orientation vs centroid - TODO
+		//check orientation vs centroid
 		Vec3d centroid = meshCentroid();
 		Vec3d facetCentroid = facet->getCentroid();
 		Vec3d diff = centroid.minus(facetCentroid);
@@ -290,13 +310,139 @@ Vec3d Mesh::generateNormal(Node* n1) {
 
 	normal = normal.mult(1.0/static_cast<double> (facets.size()));
 
-	//check orientation vs centroid - need an inward norm - TODO
-	Vec3d centroid = meshCentroid();
-	Vec3d diff = centroid.minus(n1->getCoordinates());
-	normal = normal.mult(-1.0);
+	//check orientation vs centroid - (don't need an inward norm, mesh is defined counter-clockwise indicating in/out)
+//	Vec3d centroid = getCentroid();
+//	Vec3d diff = centroid.minus(n1->getCoordinates());
+	normal = normal.mult(-1.0); //want inward, not outward
 //	if (diff.dot(normal) < 0) normal = normal.mult(-1.0);	
 
 	return normal;
+}
+
+
+void Mesh::buildNodeGraph() {
+
+	for(map<long,Facet*>::iterator it = facetroster.begin(); it != facetroster.end(); it++) {
+		Facet* facet = it->second;
+		Node* n1 = facet->getNode(0);
+		Node* n2 = facet->getNode(1);
+		Node* n3 = facet->getNode(2);
+		n1->neighbors.insert(n2); n1->neighbors.insert(n3);
+		n2->neighbors.insert(n1); n2->neighbors.insert(n3);
+		n3->neighbors.insert(n1); n3->neighbors.insert(n2);
+	}
+
+	cout << "*NODE GRAPH BUILT" << endl;
+	
+	return;
+}
+
+void Mesh::printNodeGraph() {
+
+	for(map<long,Node*>::iterator it = noderoster.begin(); it != noderoster.end(); it++) {
+
+		Node* node = it->second;
+		cout << endl;
+		cout << "<" << node->getID() << ">" << endl;
+		for (Node* n : node->neighbors){
+			cout << n->getID() << endl;
+		}
+	}
+
+}
+
+/*SphereFiller methods--------------------------------------------------------*/
+
+void SphereFiller::buildLibrary() {
+
+	inFile = inFile.substr(0,inFile.size()-3) + "out";
+	string outFile = inFile.substr(0,inFile.size()-4) + "_library.out";
+
+	//changing units
+	bool change_mm_to_m = true;
+	double units = 1.0;
+	if (change_mm_to_m) {units = 1000.0; cout << " *(note: units being changed from mm to m in library)" << endl;}
+
+	//open output file, write header
+	ofstream outfile;
+	outfile.open (outFile.c_str(), ios::app);
+	outfile << "*List:" << endl;
+
+	//for every molecule - get info
+	ifstream infile(inFile.c_str());
+	string line;
+	vector<Vec3d> centroidList;
+	vector<long> tagList;
+
+	for (unsigned i = 0; i < meshroster.size(); ++i) {
+		int nSpheres = 0;
+		Vec3d centroid = meshroster[i].getCentroid();
+		centroidList.push_back(centroid);
+		double volume = meshroster[i].getVolume();
+		double maxRadius = 0.0;
+
+		long molecule = meshroster[i].tag;
+		tagList.push_back(molecule);
+		infile.clear();
+		infile.seekg(0,ios_base::beg);//rewind to beginning
+		while (!infile.eof()) {
+			while (getline(infile,line)) {
+				vector<string> split = strSplitSpaces(line);
+				long molID = atol(split[0].c_str());
+				if (molID != molecule) continue;
+				
+				double rad = atof(split[1].c_str());
+				double x = atof(split[3].c_str());			
+				double y = atof(split[4].c_str());
+				double z = atof(split[5].c_str());
+
+				nSpheres++;
+				Vec3d atomCentroid = Vec3d(x,y,z);
+				Vec3d diff = atomCentroid.minus(centroid);
+				double dist = diff.norm() + rad;
+				if (dist > maxRadius) maxRadius = dist;
+			}
+		}
+
+		//write summary to file
+		outfile << molecule << " " << volume/(units*units*units) << "  " << maxRadius/units << " " << nSpheres << endl;
+	}
+
+
+	//copy data to file
+	outfile << endl;
+	outfile << "*Molecules:" << endl;
+	int atom = 0;
+	infile.clear();
+	infile.seekg(0,ios_base::beg);//rewind to beginning
+		while (!infile.eof()) {
+			while (getline(infile,line)) {
+				vector<string> split = strSplitSpaces(line);
+				long molID = atol(split[0].c_str());
+				Vec3d centroid = Vec3d();
+				for (unsigned i = 0; i < tagList.size(); ++i) {
+					long tag = tagList[i];
+					if (tag == molID) centroid = centroidList[i];
+				}
+
+				double rad = atof(split[1].c_str());
+				double dens = atof(split[2].c_str());	
+				double x = atof(split[3].c_str())-centroid.getX();			
+				double y = atof(split[4].c_str())-centroid.getY();
+				double z = atof(split[5].c_str())-centroid.getZ();
+
+				atom++;
+				outfile << atom << " " << 1 << " " << x/units << " " << y/units << " " << z/units << " " << rad/units << " " << dens << " " << molID << endl;
+
+			}
+		}
+	infile.close();
+
+	outfile.close();
+
+
+	cout << "*PARTICLE LIBRARY BUILT" << endl;
+	return;
 }
 
 void SphereFiller::parseInputFile (bool load_all)  {

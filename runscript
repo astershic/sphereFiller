@@ -1,2 +1,2 @@
 rm *.out
-./sphereFiller.exe TwoGrain_Shell.inp 100 2600.0 0.0
+./sphereFiller.exe TwoGrain_Shell.inp 100 2600.0 0.0 1

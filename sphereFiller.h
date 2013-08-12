@@ -105,9 +105,10 @@ public:
 	double minDist;
 	long nSphere;
 	vector<Mesh> meshroster;
+	bool library;
 
 	void parseInputFile(bool load_all);
-
+	void buildLibrary();
 private:
 
 };
