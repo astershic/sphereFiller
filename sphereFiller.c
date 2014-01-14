@@ -466,16 +466,16 @@ void SphereFiller::parseInputFile (bool load_all)  {
 		bool element = false;
 
 		while (getline(infile,line)) {
-			if (line.substr(0,5) == "*Node") {
+			if (line.substr(0,5) == "*Node" || line.substr(0,5) == "*NODE") {
 				node = true;
 				element = false;
 				continue;
 			}
-			if (line.substr(0,8) == "*Element") {
+			if (line.substr(0,8) == "*Element" || line.substr(0,8) == "*ELEMENT" || line.substr(0,19) == "**         Elements") {
 				element = true;
 				continue;
 			}
-			if (line.substr(0,6) == "*Elset" || line.substr(0,5) == "*Nset") {
+			if (line.substr(0,6) == "*Elset" || line.substr(0,5) == "*Nset" || line.substr(0,6) == "*ELSET" || line.substr(0,5) == "*NSET") {
 				break;
 			}
 		
